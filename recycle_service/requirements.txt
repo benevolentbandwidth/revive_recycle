@@ -2,3 +2,5 @@ requests
 python-dotenv
 flask
 zipcodes
+beautifulsoup4
+lxml
