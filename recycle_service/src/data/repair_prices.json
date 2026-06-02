@@ -1,0 +1,90 @@
+{
+  "_meta": {
+    "generated_at_utc": "2026-05-18T19:51:33.881301+00:00",
+    "currency": "USD"
+  },
+  "samsung galaxy s22": {
+    "screen": {
+      "source": "samsung_official",
+      "price": 199,
+      "currency": "USD",
+      "url": "https://www.samsung.com/us/support/cracked-screen-repair/"
+    }
+  },
+  "samsung galaxy s22+": {
+    "screen": {
+      "source": "samsung_official",
+      "price": 229,
+      "currency": "USD",
+      "url": "https://www.samsung.com/us/support/cracked-screen-repair/"
+    }
+  },
+  "samsung galaxy s22 ultra": {
+    "screen": {
+      "source": "samsung_official",
+      "price": 289,
+      "currency": "USD",
+      "url": "https://www.samsung.com/us/support/cracked-screen-repair/"
+    }
+  },
+  "samsung galaxy s23": {
+    "screen": {
+      "source": "samsung_official",
+      "price": 209,
+      "currency": "USD",
+      "url": "https://www.samsung.com/us/support/cracked-screen-repair/"
+    }
+  },
+  "samsung galaxy s23+": {
+    "screen": {
+      "source": "samsung_official",
+      "price": 249,
+      "currency": "USD",
+      "url": "https://www.samsung.com/us/support/cracked-screen-repair/"
+    }
+  },
+  "samsung galaxy s23 ultra": {
+    "screen": {
+      "source": "samsung_official",
+      "price": 319,
+      "currency": "USD",
+      "url": "https://www.samsung.com/us/support/cracked-screen-repair/"
+    }
+  },
+  "samsung galaxy s23 fe": {
+    "screen": {
+      "source": "samsung_official",
+      "price": 99,
+      "currency": "USD",
+      "url": "https://www.samsung.com/us/support/cracked-screen-repair/"
+    }
+  },
+  "iphone 12": {
+    "screen": {
+      "source": "apple_official_manual",
+      "price": 279,
+      "currency": "USD",
+      "url": "https://support.apple.com/iphone/repair"
+    },
+    "battery": {
+      "source": "apple_official_manual",
+      "price": 89,
+      "currency": "USD",
+      "url": "https://support.apple.com/iphone/repair"
+    }
+  },
+  "iphone 13": {
+    "screen": {
+      "source": "apple_official_manual",
+      "price": 279,
+      "currency": "USD",
+      "url": "https://support.apple.com/iphone/repair"
+    },
+    "battery": {
+      "source": "apple_official_manual",
+      "price": 89,
+      "currency": "USD",
+      "url": "https://support.apple.com/iphone/repair"
+    }
+  }
+}
