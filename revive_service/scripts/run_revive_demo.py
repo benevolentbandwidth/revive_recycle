@@ -5,7 +5,7 @@ Run from recycle-service:
 python -m scripts.run_revive_demo
 """
 
-from src.services.revive_service import ReviveService
+from revive_service.src.services.revive_service import ReviveService
 
 
 def main() -> None:

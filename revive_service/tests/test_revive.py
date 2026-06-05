@@ -8,7 +8,7 @@ from pathlib import Path
 ROOT_DIR = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT_DIR))
 
-from src.services.revive_service import (
+from revive_service.src.services.revive_service import (
     condition_to_repair_key,
     normalize_condition,
 )
