@@ -16,7 +16,7 @@ from pathlib import Path
 from dotenv import load_dotenv
 
 from src.data import revive_config as config
-from src.services.repair_places import RepairPlacesService
+from revive_service.src.services.repair_places import RepairPlacesService
 from src.utils.ebay_client import (
     search_ebay_condition_prices,
     search_ebay_used_prices,
@@ -46,13 +46,12 @@ class ReviveService:
         """
         Main entry point. Returns repair-value analysis for a device.
 
-        Inputs:
-          - device_name: device model name, e.g. "Samsung Galaxy S22"
-          - condition: damage/condition text, e.g. "cracked screen"
-          - zip_code: optional location for nearby repair providers and repair links
+        Leader formula:
+          net_value = fixed resale value - repair cost - broken resale value
 
-        Returns:
-          - structured revive recommendation
+        Recommendation:
+            net_value > 0  -> revive_it
+            net_value <= 0 -> recycle_it
         """
         normalized_condition = normalize_condition(condition)
 
@@ -135,15 +134,17 @@ class ReviveService:
         repair_cost_info = get_repair_cost(device_name, normalized_condition)
         repair_cost = repair_cost_info["price"]
 
-        net_after_repair = round(fixed_value - repair_cost, 2)
-        extra_value_from_repair = round(net_after_repair - damaged_value, 2)
+        # net_value = round(fixed_value - repair_cost, 2)
+        # extra_value_from_repair = round(net_value - damaged_value, 2)
+        net_value = round(fixed_value - repair_cost - damaged_value, 2)
 
-        decision, reason = compute_decision(
-            condition=normalized_condition,
-            damaged_value=damaged_value,
-            net_after_repair=net_after_repair,
-            extra_value_from_repair=extra_value_from_repair,
-        )
+        # decision, reason = compute_decision(
+        #     condition=normalized_condition,
+        #     damaged_value=damaged_value,
+        #     net_value=net_value,
+        #     extra_value_from_repair=extra_value_from_repair,
+        # )
+        decision, reason = compute_decision(net_value)
 
         status = "ok"
         if (
@@ -193,8 +194,8 @@ class ReviveService:
                 "nearby_repair_providers": nearby_repair_providers,
             },
             "financials": {
-                "net_after_repair": net_after_repair,
-                "extra_value_from_repair": extra_value_from_repair,
+                "net_value": net_value,
+                "formula": "fixed_resale_value - repair_cost - broken_resale_value",
             },
             "sources": {
                 "fixed_market_value": "ebay_used_search",
@@ -364,22 +365,26 @@ def fallback_as_is_value(market_price: float, condition: str) -> float:
     return round(market_price * multiplier, 2)
 
 
-def compute_decision(
-    condition: str,
-    damaged_value: float,
-    net_after_repair: float,
-    extra_value_from_repair: float,
-) -> tuple[str, str]:
-    if condition == "works fine":
-        return "sell_as_is", "The device already works fine."
+def compute_decision(net_value: float) -> tuple[str, str]:
+    """
+    Leader definition:
 
-    if extra_value_from_repair >= 40:
-        return "repair", "Repair appears to create enough extra value."
+    net_value =
+        fixed resale value
+        - repair cost
+        - broken resale value
+    """
 
-    if damaged_value >= net_after_repair:
-        return "sell_as_is", "Selling as-is appears better than repairing."
+    if net_value > 0:
+        return (
+            "revive_it",
+            f"Repairing creates ${net_value:.2f} in net value."
+        )
 
-    return "borderline", "The value difference is small."
+    return (
+        "recycle_it",
+        f"Repairing creates ${net_value:.2f} in net value."
+    )
 
 
 def build_repair_option_name(
