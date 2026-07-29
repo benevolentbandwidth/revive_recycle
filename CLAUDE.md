@@ -220,6 +220,8 @@ Critical path: `device list → failure taxonomy → schema freeze → Track A �
 npm install
 npm run dev            # http://localhost:3000
 npm run build          # static export → web/out/
+npm run preview        # serve the built out/ folder (there is no `npm start`:
+                       # `next start` needs a Node server, static export has none)
 npm run lint
 
 # Deploy the frontend (needs Firebase CLI + a real .firebaserc)

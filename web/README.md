@@ -17,7 +17,16 @@ npm run dev        # http://localhost:3000
 |---|---|
 | `npm run dev` | Dev server with hot reload |
 | `npm run build` | Static export → `web/out/` |
+| `npm run preview` | Serve the built `out/` folder at localhost:3000 |
 | `npm run lint` | ESLint |
+
+There is deliberately **no `npm start`**. `next start` runs a Node server, which a
+static export does not have — Next.js errors out and tells you to serve the folder
+instead. `npm run preview` does exactly that, via `serve`. Use it to check a real
+build; use `npm run dev` for day-to-day work.
+
+Node 20.9+ required, 24 recommended (`.nvmrc`). No Docker needed — the deploy targets
+are a file host and a Cloud Function, neither of which runs a container you manage.
 
 Copy `.env.example` to `.env.local` before running against a real proxy or catalog.
 Every variable there is `NEXT_PUBLIC_*` and therefore **public** — this is a static
