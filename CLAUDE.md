@@ -46,8 +46,13 @@ Still true at root:
 |---|---|
 | [README.md](README.md) | **Stale.** Describes the Streamlit/Gemini app and a 10-device MVP. PRD says 20 devices, no photo detection. Rewrite is a Phase 3 task. |
 
-`device_catalog.json` **does not exist yet**. Neither does the Next.js app, the
-serverless proxy, or the Firestore store.
+[web/](web/) is the **Track C frontend scaffold** — Next.js 16 (App Router) + React 19
++ Tailwind 4 + TypeScript, configured for static export to Firebase Hosting. It runs
+and builds, but renders a placeholder page: the real screens read
+`device_catalog.json`, whose schema is not frozen yet. See [web/README.md](web/README.md).
+
+`device_catalog.json` **does not exist yet**. Neither does the serverless proxy, the
+data pipeline, or the Firestore store.
 
 ## Target architecture (PRD §5)
 
@@ -75,6 +80,13 @@ GitHub Actions → Python (iFixit only)   Browser (Next.js, static export, no pe
 The PRD says "purely static frontend"; a **thin serverless proxy is a ratified
 departure** (Implementation-Plan §0.1) because the DeepSeek and Places keys cannot
 live in the browser.
+
+⚠️ **The proxy cannot be a Next.js route handler.** PRD §5 lists the market data
+service as "Cloud Function / Next.js route handler" — those are mutually exclusive.
+`web/` sets `output: "export"` per Track C, and Next.js does not support Route
+Handlers, Server Actions, Middleware, or `next.config` `headers`/`redirects`/`rewrites`
+under static export. Track B must therefore ship as a **standalone Cloud Function**.
+Hosting headers live in the repo-root [firebase.json](firebase.json) instead.
 
 ## Invariants — do not violate these without an explicit decision
 
@@ -203,13 +215,24 @@ Critical path: `device list → failure taxonomy → schema freeze → Track A �
 
 ## Commands
 
-**There is no live build yet.** The Next.js app, the pipeline, and the proxy are all
-unscaffolded — Phase 1 adds their commands here. The only thing that runs today is the
-PR-description check, which CI invokes:
-
 ```bash
-python .github/scripts/validate-pr-body.py   # needs a GitHub event payload; CI-only
+# Frontend (Track C) — from web/
+npm install
+npm run dev            # http://localhost:3000
+npm run build          # static export → web/out/
+npm run preview        # serve the built out/ folder (there is no `npm start`:
+                       # `next start` needs a Node server, static export has none)
+npm run lint
+
+# Deploy the frontend (needs Firebase CLI + a real .firebaserc)
+cd web && npm run build && cd .. && firebase deploy --only hosting
+
+# PR-description check (CI invokes this; needs a GitHub event payload)
+python .github/scripts/validate-pr-body.py
 ```
+
+The **pipeline (Track A)** and **serverless proxy (Track B)** are still unscaffolded;
+their commands land here when they exist.
 
 The old per-service test and scraper commands moved with their code into `legacy/` and
 are **not** maintained — see [legacy/README.md](legacy/README.md). Do not run them to
@@ -226,7 +249,6 @@ check the box for the command you ran.
 
 ## Environment
 
-Windows 10, PowerShell primary (Bash also available). Nothing in the target build is
-scaffolded yet — no Next.js app, no pipeline, no proxy. The only Python in the repo is
-the archived prototype under `legacy/` and the CI PR-description validator. Branch:
-`main`.
+Windows 10, PowerShell primary (Bash also available). Node 24 / npm 10 for `web/`.
+The pipeline and proxy are not scaffolded yet. The only Python in the repo is the
+archived prototype under `legacy/` and the CI PR-description validator. Branch: `main`.
