@@ -1,90 +1,76 @@
 {
   "_meta": {
-    "generated_at_utc": "2026-05-18T19:51:33.881301+00:00",
-    "currency": "USD"
+    "currency": "USD",
+    "pricing_method": "manually_curated_public_sources",
+    "maintenance_method": "manual",
+    "review_cadence": "twice_per_year",
+    "last_reviewed": "2026-07-15",
+    "scope": "out-of-warranty public repair pricing",
+    "notes": [
+      "Only prices verified on public official repair pages are included.",
+      "No fallback estimates are stored as real repair prices.",
+      "Samsung describes these as approximate or suggested screen repair prices.",
+      "Actual cost may vary by diagnosis, warranty status, repair location, taxes, and repair type."
+    ]
   },
   "samsung galaxy s22": {
     "screen": {
-      "source": "samsung_official",
-      "price": 199,
+      "price_low": 174.0,
+      "price_high": 174.0,
+      "representative_price": 174.0,
       "currency": "USD",
-      "url": "https://www.samsung.com/us/support/cracked-screen-repair/"
-    }
-  },
-  "samsung galaxy s22+": {
-    "screen": {
-      "source": "samsung_official",
-      "price": 229,
-      "currency": "USD",
-      "url": "https://www.samsung.com/us/support/cracked-screen-repair/"
-    }
-  },
-  "samsung galaxy s22 ultra": {
-    "screen": {
-      "source": "samsung_official",
-      "price": 289,
-      "currency": "USD",
-      "url": "https://www.samsung.com/us/support/cracked-screen-repair/"
+      "service_scope": "screen_repair",
+      "sources": [
+        {
+          "provider": "Samsung",
+          "source_type": "manufacturer_official",
+          "price": 174.0,
+          "url": "https://www.samsung.com/us/support/cracked-screen-repair/",
+          "evidence": "Samsung US lists Galaxy S22 screen repair at $174."
+        }
+      ],
+      "last_updated": "2026-07-15",
+      "confidence": "high"
     }
   },
   "samsung galaxy s23": {
     "screen": {
-      "source": "samsung_official",
-      "price": 209,
+      "price_low": 174.0,
+      "price_high": 174.0,
+      "representative_price": 174.0,
       "currency": "USD",
-      "url": "https://www.samsung.com/us/support/cracked-screen-repair/"
+      "service_scope": "screen_repair",
+      "sources": [
+        {
+          "provider": "Samsung",
+          "source_type": "manufacturer_official",
+          "price": 174.0,
+          "url": "https://www.samsung.com/us/support/cracked-screen-repair/",
+          "evidence": "Samsung US lists Galaxy S23 screen repair at $174."
+        }
+      ],
+      "last_updated": "2026-07-15",
+      "confidence": "high"
     }
   },
-  "samsung galaxy s23+": {
+  "samsung galaxy s24": {
     "screen": {
-      "source": "samsung_official",
-      "price": 249,
+      "price_low": 174.0,
+      "price_high": 174.0,
+      "representative_price": 174.0,
       "currency": "USD",
-      "url": "https://www.samsung.com/us/support/cracked-screen-repair/"
-    }
-  },
-  "samsung galaxy s23 ultra": {
-    "screen": {
-      "source": "samsung_official",
-      "price": 319,
-      "currency": "USD",
-      "url": "https://www.samsung.com/us/support/cracked-screen-repair/"
-    }
-  },
-  "samsung galaxy s23 fe": {
-    "screen": {
-      "source": "samsung_official",
-      "price": 99,
-      "currency": "USD",
-      "url": "https://www.samsung.com/us/support/cracked-screen-repair/"
-    }
-  },
-  "iphone 12": {
-    "screen": {
-      "source": "apple_official_manual",
-      "price": 279,
-      "currency": "USD",
-      "url": "https://support.apple.com/iphone/repair"
-    },
-    "battery": {
-      "source": "apple_official_manual",
-      "price": 89,
-      "currency": "USD",
-      "url": "https://support.apple.com/iphone/repair"
-    }
-  },
-  "iphone 13": {
-    "screen": {
-      "source": "apple_official_manual",
-      "price": 279,
-      "currency": "USD",
-      "url": "https://support.apple.com/iphone/repair"
-    },
-    "battery": {
-      "source": "apple_official_manual",
-      "price": 89,
-      "currency": "USD",
-      "url": "https://support.apple.com/iphone/repair"
+      "service_scope": "screen_repair",
+      "sources": [
+        {
+          "provider": "Samsung",
+          "source_type": "manufacturer_official",
+          "price": 174.0,
+          "url": "https://www.samsung.com/us/support/cracked-screen-repair/",
+          "evidence": "Samsung US lists Galaxy S24 screen repair at $174."
+        }
+      ],
+      "last_updated": "2026-07-15",
+      "confidence": "high"
     }
   }
 }

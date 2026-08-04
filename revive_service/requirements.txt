@@ -4,3 +4,4 @@ flask
 zipcodes
 beautifulsoup4
 lxml
+streamlit
