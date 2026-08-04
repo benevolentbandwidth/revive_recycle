@@ -1,35 +1,35 @@
 // For format details, see https://aka.ms/devcontainer.json. For config options, see the
 // README at: https://github.com/devcontainers/templates/tree/main/src/python
+//
+// Deliberately minimal: the target build (Next.js frontend, Python data pipeline,
+// serverless proxy) is not scaffolded yet, so there is nothing to install or launch.
+// Add an updateContentCommand once a real requirements.txt / package.json exists.
+//
+// The previous version installed the Streamlit prototype's dependencies and then ran
+// `streamlit run streamlit_app.py` — a file that has never existed in this repo, so the
+// container failed to start regardless. That prototype now lives in legacy/ and is
+// deliberately not installed or run; see legacy/README.md.
 {
-	"name": "Python 3",
-	// Or use a Dockerfile or Docker Compose file. More info: https://containers.dev/guide/dockerfile
+	"name": "Revive or Recycle",
 	"image": "mcr.microsoft.com/devcontainers/python:1-3.11-bullseye",
+	"features": {
+		"ghcr.io/devcontainers/features/node:1": {
+			"version": "lts"
+		}
+	},
 	"customizations": {
-    "codespaces": {
-      "openFiles": [
-        "README.md",
-        "streamlit_app.py"
-      ]
-    },
-    "vscode": {
-      "settings": {},
-      "extensions": [
-        "ms-python.python",
-        "ms-python.vscode-pylance"
-      ]
-    }
-  },
-  "updateContentCommand": "[ -f packages.txt ] && sudo apt update && sudo apt upgrade && sudo xargs apt install -y <packages.txt; pip3 install --user -r requirements.txt",
-  "postAttachCommand": {
-    "server": "streamlit run streamlit_app.py --server.enableCORS false --server.enableXsrfProtection false"
-  },
-  "portsAttributes": {
-    "8501": {
-      "label": "Application",
-      "onAutoForward": "openPreview"
-    }
-  },
-  "forwardPorts": [
-    8501
-  ]
+		"codespaces": {
+			"openFiles": [
+				"CLAUDE.md",
+				"Revive-or-Recycle-PRD.md"
+			]
+		},
+		"vscode": {
+			"settings": {},
+			"extensions": [
+				"ms-python.python",
+				"ms-python.vscode-pylance"
+			]
+		}
+	}
 }

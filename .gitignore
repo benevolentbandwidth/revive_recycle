@@ -30,3 +30,17 @@ build/
 # IDE
 .vscode/
 .idea/
+
+# Node / Next.js (the web/ app also carries its own scoped .gitignore)
+node_modules/
+.next/
+out/
+*.tsbuildinfo
+npm-debug.log*
+
+# Firebase
+# .firebaserc holds the real GCP project id and is not committed while infra is
+# being provisioned (Phase 0 task 6). Copy .firebaserc.example to .firebaserc.
+.firebaserc
+.firebase/
+firebase-debug.log*
