@@ -1,97 +1,189 @@
 """
-Configuration for Revive decision service.
+Configuration for the Revive repair-pricing service.
+
+Current MVP scope:
+- Smartphone devices only
+- Repair pricing only
+- No eBay, resale, recycle, Google Places, or price-comparison logic
+- No fallback repair-price estimates
 """
+
+MVP_SUPPORTED_DEVICES = [
+    "iphone 11",
+    "iphone 12",
+    "iphone 13",
+    "iphone 14",
+    "iphone 15",
+    "samsung galaxy s21",
+    "samsung galaxy s22",
+    "samsung galaxy s23",
+    "samsung galaxy s24",
+    "samsung galaxy a35",
+    "samsung galaxy a54",
+    "google pixel 6",
+    "google pixel 7",
+    "google pixel 8",
+    "google pixel 8a",
+    "oneplus 10 pro",
+    "oneplus 11",
+    "oneplus 12",
+    "moto g power",
+    "moto g stylus",
+]
+
+DEVICE_ALIASES = {
+    "iphone11": "iphone 11",
+    "iphone 11": "iphone 11",
+    "iphone12": "iphone 12",
+    "iphone 12": "iphone 12",
+    "iphone13": "iphone 13",
+    "iphone 13": "iphone 13",
+    "iphone14": "iphone 14",
+    "iphone 14": "iphone 14",
+    "iphone15": "iphone 15",
+    "iphone 15": "iphone 15",
+
+    "samsung s21": "samsung galaxy s21",
+    "galaxy s21": "samsung galaxy s21",
+    "samsung galaxy s21": "samsung galaxy s21",
+    "samsung s22": "samsung galaxy s22",
+    "galaxy s22": "samsung galaxy s22",
+    "samsung galaxy s22": "samsung galaxy s22",
+    "samsung s23": "samsung galaxy s23",
+    "galaxy s23": "samsung galaxy s23",
+    "samsung galaxy s23": "samsung galaxy s23",
+    "samsung s24": "samsung galaxy s24",
+    "galaxy s24": "samsung galaxy s24",
+    "samsung galaxy s24": "samsung galaxy s24",
+
+    "samsung a35": "samsung galaxy a35",
+    "galaxy a35": "samsung galaxy a35",
+    "samsung galaxy a35": "samsung galaxy a35",
+    "samsung a54": "samsung galaxy a54",
+    "galaxy a54": "samsung galaxy a54",
+    "samsung galaxy a54": "samsung galaxy a54",
+
+    "pixel 6": "google pixel 6",
+    "google pixel 6": "google pixel 6",
+    "pixel 7": "google pixel 7",
+    "google pixel 7": "google pixel 7",
+    "pixel 8": "google pixel 8",
+    "google pixel 8": "google pixel 8",
+    "pixel 8a": "google pixel 8a",
+    "google pixel 8a": "google pixel 8a",
+
+    "oneplus 10 pro": "oneplus 10 pro",
+    "oneplus 11": "oneplus 11",
+    "oneplus 12": "oneplus 12",
+
+    "moto g power": "moto g power",
+    "motorola g power": "moto g power",
+    "moto g stylus": "moto g stylus",
+    "motorola g stylus": "moto g stylus",
+}
 
 CATEGORY_MAP = {
     "iphone": "smartphone",
     "galaxy s": "smartphone",
+    "galaxy a": "smartphone",
     "samsung galaxy": "smartphone",
     "pixel": "smartphone",
-    "macbook": "laptop",
-    "surface": "laptop",
-    "ipad": "tablet",
+    "oneplus": "smartphone",
+    "moto": "smartphone",
+    "motorola": "smartphone",
 }
 
-REPAIR_COST_MATRIX = {
-    "smartphone": {
-        "cracked screen": 130.0,
-        "battery issue": 85.0,
-        "works fine": 0.0,
-        "default": 100.0,
-    },
-    "laptop": {
-        "cracked screen": 250.0,
-        "battery issue": 180.0,
-        "works fine": 0.0,
-        "default": 200.0,
-    },
-    "tablet": {
-        "cracked screen": 180.0,
-        "battery issue": 110.0,
-        "works fine": 0.0,
-        "default": 150.0,
-    },
-    "general": {
-        "cracked screen": 150.0,
-        "battery issue": 100.0,
-        "works fine": 0.0,
-        "default": 120.0,
-    },
+CONDITION_ALIASES = {
+    "cracked screen": [
+        "cracked screen",
+        "screen cracked",
+        "broken screen",
+        "screen broken",
+        "damaged screen",
+        "damaged display",
+        "broken display",
+        "lcd damage",
+        "screen damage",
+        "display damage",
+    ],
+    "battery issue": [
+        "battery issue",
+        "bad battery",
+        "battery degraded",
+        "battery replacement",
+        "battery problem",
+        "doesn't hold charge",
+        "does not hold charge",
+        "drains fast",
+        "battery drains fast",
+        "poor battery life",
+    ],
+    "back glass cracked": [
+        "back glass cracked",
+        "cracked back",
+        "damaged back",
+        "broken back glass",
+        "rear glass cracked",
+    ],
+    "charging issue": [
+        "charging issue",
+        "charging problem",
+        "won't charge",
+        "wont charge",
+        "doesn't charge",
+        "does not charge",
+        "not charging",
+        "charging port broken",
+        "broken charging port",
+        "damaged charging port",
+        "loose charging port",
+    ],
+    "won't turn on": [
+        "won't turn on",
+        "wont turn on",
+        "doesn't turn on",
+        "does not turn on",
+        "not turning on",
+        "no power",
+        "dead phone",
+    ],
+    "works fine": [
+        "works fine",
+        "working",
+        "functional",
+        "fully functional",
+        "no issue",
+        "no issues",
+        "good condition",
+    ],
 }
 
-CONDITION_MULTIPLIERS = {
-    "works fine": 1.0,
-    "cracked screen": 0.5,
-    "battery issue": 0.7,
-    "default": 0.6,
+CONDITION_TO_REPAIR_KEY = {
+    "cracked screen": "screen",
+    "battery issue": "battery",
+    "back glass cracked": "back_glass",
+    "charging issue": "charging_port",
+    "won't turn on": "diagnostic",
+    "works fine": "none",
 }
 
-MANUFACTURER_REPAIR_URLS = {
-    "apple": "https://support.apple.com/iphone/repair",
-    "samsung": "https://www.samsung.com/us/support/cracked-screen-repair/",
-    "google": "https://store.google.com/repair",
-    "microsoft": "https://support.microsoft.com/surface",
-}
+SUPPORTED_REPAIR_TYPES = [
+    "screen",
+    "battery",
+    "back_glass",
+    "charging_port",
+]
 
-DEVICE_FILTERS = {
-    "iphone 12": {
-        "include": ["iphone 12"],
-        "exclude": ["mini", "pro", "pro max"],
+NON_PRICED_REPAIR_TYPES = {
+    "diagnostic": {
+        "reason": "diagnostic_required",
+        "description": (
+            "The cause cannot be determined from the reported condition alone, "
+            "so a fixed repair price should not be returned."
+        ),
     },
-    "iphone 13": {
-        "include": ["iphone 13"],
-        "exclude": ["mini", "pro", "pro max"],
-    },
-    "iphone 14": {
-        "include": ["iphone 14"],
-        "exclude": ["plus", "pro", "pro max"],
-    },
-    "iphone 11": {
-        "include": ["iphone 11"],
-        "exclude": ["pro", "pro max"],
-    },
-    "samsung galaxy s22": {
-        "include": ["galaxy s22"],
-        "exclude": ["s22+", "s22 plus", "ultra"],
-    },
-    "samsung galaxy s23": {
-        "include": ["galaxy s23"],
-        "exclude": ["s23+", "s23 plus", "ultra", "fe"],
-    },
-    "google pixel 7": {
-        "include": ["pixel 7"],
-        "exclude": ["7 pro", "7a"],
-    },
-    "macbook air": {
-        "include": ["macbook air"],
-        "exclude": ["macbook pro"],
-    },
-    "ipad": {
-        "include": ["ipad"],
-        "exclude": ["ipad pro", "ipad mini", "ipad air"],
-    },
-    "microsoft surface pro": {
-        "include": ["surface pro"],
-        "exclude": ["surface laptop", "surface book", "surface go"],
+    "none": {
+        "reason": "no_repair_needed",
+        "description": "The device is reported as working and does not need repair.",
     },
 }

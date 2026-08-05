@@ -11,6 +11,7 @@ sys.path.insert(0, str(ROOT_DIR))
 from revive_service.src.services.revive_service import (
     condition_to_repair_key,
     normalize_condition,
+    is_mvp_supported_device,
 )
 
 
@@ -37,3 +38,14 @@ def test_condition_to_repair_key():
     assert condition_to_repair_key("cracked screen") == "screen"
     assert condition_to_repair_key("battery issue") == "battery"
     assert condition_to_repair_key("works fine") == "default"
+    
+def test_is_mvp_supported_device():
+    assert is_mvp_supported_device("iphone 12") is True
+    assert is_mvp_supported_device("samsung galaxy s23") is True
+    assert is_mvp_supported_device("google pixel 8") is True
+
+
+def test_is_not_mvp_supported_device():
+    assert is_mvp_supported_device("macbook air") is False
+    assert is_mvp_supported_device("ipad") is False
+    assert is_mvp_supported_device("microsoft surface pro") is False

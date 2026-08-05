@@ -1,41 +1,204 @@
 """
-Revive Decision Service for the Revive-or-Recycle Scanner.
+Revive Repair Service for the Revive-or-Recycle Scanner.
 
-Gives repair-value recommendations through a layered approach:
-  1. Used-device market value from eBay listings
-  2. Damaged/as-is market value from eBay condition-specific listings
-  3. Official repair pricing from scraped manufacturer pages
-  4. Fallback category-based repair estimate if official pricing is unavailable
-  5. Repair links and nearby repair providers
+Runtime responsibility:
+  1. Normalize device and condition
+  2. Read repair prices from static repair_prices.json
+  3. Fall back to config-based flat-rate estimates
+  4. Return repair links and nearby repair providers
+
+This service does NOT:
+  - Query eBay
+  - Calculate resale value
+  - Calculate damaged/as-is value
+  - Calculate net value
+  - Return revive/recycle recommendation
 """
 
 import json
-import os
 from pathlib import Path
 
 from dotenv import load_dotenv
 
+from revive_service.repair_documentation import get_repair_documentation
 from src.data import revive_config as config
-from revive_service.src.services.repair_places import RepairPlacesService
-from src.utils.ebay_client import (
-    search_ebay_condition_prices,
-    search_ebay_used_prices,
-)
-from src.utils.repair_links import get_repair_fallback_links
 
 load_dotenv()
 
 REPAIR_PRICE_FILE = Path(__file__).resolve().parents[1] / "data" / "repair_prices.json"
 
 
+def empty_repair_documentation(
+    device: str,
+    issue: str,
+    error: str,
+) -> dict:
+    """Build a documentation response without contacting iFixit."""
+    return {
+        "device": device,
+        "issue": issue,
+        "matched": False,
+        "used_related_variant_fallback": False,
+        "guides": [],
+        "source": {
+            "name": "iFixit",
+            "api_version": "2.0",
+        },
+        "errors": [error],
+    }
+
+
 class ReviveService:
-    def __init__(
-        self,
-        ebay_access_token: str | None = None,
-        google_api_key: str | None = None,
-    ):
-        self.ebay_access_token = ebay_access_token or os.getenv("EBAY_ACCESS_TOKEN")
+    def __init__(self, google_api_key: str | None = None):
         self.repair_places = RepairPlacesService(api_key=google_api_key)
+
+    def get_repair_estimate(
+        self,
+        device_name: str,
+        condition: str,
+        zip_code: str | None = None,
+    ) -> dict:
+        normalized_device = normalize_device_name(device_name)
+        normalized_condition = normalize_condition(condition)
+        device_category = get_device_category(normalized_device)
+
+        # repair_links = get_repair_fallback_links(
+        #     device_name=normalized_device,
+        #     condition=normalized_condition,
+        #     zip_code=zip_code,
+        # )
+
+        nearby_repair_providers = self.repair_places.find_nearby_repair_providers(
+            zip_code=zip_code,
+            device_name=normalized_device,
+            condition=normalized_condition,
+        )
+
+        if not is_mvp_supported_device(normalized_device):
+            repair_documentation = empty_repair_documentation(
+                device=device_name,
+                issue=condition,
+                error="Unsupported device",
+            )
+            return {
+                "status": "unsupported_device",
+                "device": {
+                    "input": device_name,
+                    "normalized": normalized_device,
+                    "category": device_category,
+                },
+                "condition": {
+                    "input": condition,
+                    "normalized": normalized_condition,
+                },
+                "zip_code": zip_code,
+                "repair_documentation": repair_documentation,
+                "repair": {
+                    "estimated_cost": None,
+                    "currency": "USD",
+                    "source": None,
+                    "repair_type": None,
+                    "options": [],
+                    # "search_links": repair_links,
+                    "nearby_repair_providers": nearby_repair_providers,
+                },
+                "metadata": {
+                    "service_scope": "repair_pricing_only",
+                    "reason": "Device is not currently supported by the MVP catalog.",
+                },
+            }
+
+        if normalized_condition == "unknown":
+            repair_documentation = empty_repair_documentation(
+                device=device_name,
+                issue=condition,
+                error="Unsupported condition",
+            )
+            return {
+                "status": "unsupported_condition",
+                "device": {
+                    "input": device_name,
+                    "normalized": normalized_device,
+                    "category": device_category,
+                },
+                "condition": {
+                    "input": condition,
+                    "normalized": normalized_condition,
+                },
+                "zip_code": zip_code,
+                "repair_documentation": repair_documentation,
+                "repair": {
+                    "estimated_cost": None,
+                    "currency": "USD",
+                    "source": None,
+                    "repair_type": None,
+                    "options": [],
+                    "nearby_repair_providers": nearby_repair_providers,
+                },
+                "metadata": {
+                    "service_scope": "repair_pricing_only",
+                    "reason": "Condition is not currently supported or could not be normalized.",
+                },
+            }
+
+        repair_documentation = get_repair_documentation(
+            device=device_name,
+            issue=condition,
+        )
+
+        repair_cost_info = get_repair_cost(
+            device_name=normalized_device,
+            condition=normalized_condition,
+        )
+
+        repair_option = {
+            "name": build_repair_option_name(
+                device_name=normalized_device,
+                condition=normalized_condition,
+                source=repair_cost_info["source"],
+            ),
+            "repair_type": condition_to_repair_key(normalized_condition),
+            "estimated_cost": repair_cost_info["price"],
+            "currency": "USD",
+            "source": repair_cost_info["source"],
+            "url": repair_cost_info.get("url"),
+        }
+
+        status = "ok"
+        confidence = "high"
+
+        if repair_cost_info["source"] == "config_baseline_estimate":
+            status = "partial_data"
+            confidence = "medium"
+
+        return {
+            "status": status,
+            "device": {
+                "input": device_name,
+                "normalized": normalized_device,
+                "category": device_category,
+            },
+            "condition": {
+                "input": condition,
+                "normalized": normalized_condition,
+            },
+            "zip_code": zip_code,
+            "repair_documentation": repair_documentation,
+            "repair": {
+                "estimated_cost": repair_cost_info["price"],
+                "currency": "USD",
+                "source": repair_cost_info["source"],
+                "repair_type": condition_to_repair_key(normalized_condition),
+                "confidence": confidence,
+                "options": [repair_option],
+                "search_links": repair_links,
+                "nearby_repair_providers": nearby_repair_providers,
+            },
+            "metadata": {
+                "service_scope": "repair_pricing_only",
+                "final_decision_owner": "backend_or_frontend_dashboard",
+            },
+        }
 
     def analyze_repair_value(
         self,
@@ -44,224 +207,48 @@ class ReviveService:
         zip_code: str | None = None,
     ) -> dict:
         """
-        Main entry point. Returns repair-value analysis for a device.
-
-        Leader formula:
-          net_value = fixed resale value - repair cost - broken resale value
-
-        Recommendation:
-            net_value > 0  -> revive_it
-            net_value <= 0 -> recycle_it
+        Backward-compatible wrapper.
+        Prefer get_repair_estimate().
         """
-        normalized_condition = normalize_condition(condition)
-
-        nearby_repair_providers = self.repair_places.find_nearby_repair_providers(
-            zip_code=zip_code,
+        return self.get_repair_estimate(
             device_name=device_name,
-            condition=normalized_condition,
-        )
-
-        if normalized_condition == "unknown":
-            return {
-                "status": "failed",
-                "device": device_name,
-                "condition": condition,
-                "normalized_condition": normalized_condition,
-                "zip_code": zip_code,
-                "recommendation": {
-                    "decision": "unknown",
-                    "reason": "Unsupported or unclear device condition.",
-                },
-                "repair": {
-                    "search_links": get_repair_fallback_links(
-                        device_name,
-                        condition,
-                        zip_code,
-                    ),
-                    "nearby_repair_providers": nearby_repair_providers,
-                },
-            }
-
-        fixed_market = search_ebay_used_prices(
-            device_name=device_name,
-            access_token=self.ebay_access_token,
-        )
-
-        if not fixed_market.get("success"):
-            reason = fixed_market.get("error", "Could not retrieve fixed market value.")
-
-            if reason == "TOKEN_EXPIRED":
-                reason = "eBay access token expired. Please refresh token."
-
-            return {
-                "status": "failed",
-                "device": device_name,
-                "condition": condition,
-                "normalized_condition": normalized_condition,
-                "zip_code": zip_code,
-                "recommendation": {
-                    "decision": "unknown",
-                    "reason": reason,
-                },
-                "repair": {
-                    "search_links": get_repair_fallback_links(
-                        device_name,
-                        normalized_condition,
-                        zip_code,
-                    ),
-                    "nearby_repair_providers": nearby_repair_providers,
-                },
-                "debug": {
-                    "fixed_market": fixed_market,
-                },
-            }
-
-        damaged_market = search_ebay_condition_prices(
-            device_name=device_name,
-            condition=normalized_condition,
-            access_token=self.ebay_access_token,
-        )
-
-        fixed_value = fixed_market["median_price"]
-
-        if damaged_market.get("success"):
-            damaged_value = damaged_market["median_price"]
-            damaged_value_source = "ebay_condition_search"
-        else:
-            damaged_value = fallback_as_is_value(fixed_value, normalized_condition)
-            damaged_value_source = "fallback_multiplier"
-
-        repair_cost_info = get_repair_cost(device_name, normalized_condition)
-        repair_cost = repair_cost_info["price"]
-
-        # net_value = round(fixed_value - repair_cost, 2)
-        # extra_value_from_repair = round(net_value - damaged_value, 2)
-        net_value = round(fixed_value - repair_cost - damaged_value, 2)
-
-        # decision, reason = compute_decision(
-        #     condition=normalized_condition,
-        #     damaged_value=damaged_value,
-        #     net_value=net_value,
-        #     extra_value_from_repair=extra_value_from_repair,
-        # )
-        decision, reason = compute_decision(net_value)
-
-        status = "ok"
-        if (
-            damaged_value_source == "fallback_multiplier"
-            or repair_cost_info["source"] == "config_baseline_estimate"
-        ):
-            status = "partial_data"
-
-        repair_links = get_repair_fallback_links(
-            device_name=device_name,
-            condition=normalized_condition,
+            condition=condition,
             zip_code=zip_code,
         )
-
-        return {
-            "status": status,
-            "device": device_name,
-            "condition": condition,
-            "normalized_condition": normalized_condition,
-            "zip_code": zip_code,
-            "recommendation": {
-                "decision": decision,
-                "reason": reason,
-            },
-            "market_data": {
-                "fixed_value": fixed_value,
-                "damaged_value": damaged_value,
-                "currency": "USD",
-            },
-            "repair": {
-                "estimated_cost": repair_cost,
-                "source": repair_cost_info["source"],
-                "options": [
-                    {
-                        "name": build_repair_option_name(
-                            device_name,
-                            normalized_condition,
-                            repair_cost_info["source"],
-                        ),
-                        "source": repair_cost_info["source"],
-                        "estimated_cost": repair_cost,
-                        "currency": "USD",
-                        "url": repair_cost_info.get("url"),
-                    }
-                ],
-                "search_links": repair_links,
-                "nearby_repair_providers": nearby_repair_providers,
-            },
-            "financials": {
-                "net_value": net_value,
-                "formula": "fixed_resale_value - repair_cost - broken_resale_value",
-            },
-            "sources": {
-                "fixed_market_value": "ebay_used_search",
-                "damaged_market_value": damaged_value_source,
-                "repair_cost": repair_cost_info["source"],
-            },
-            "metadata": {
-                "device_category": get_device_category(device_name),
-                "currency": "USD",
-            },
-            "debug": {
-                "fixed_market_examples": fixed_market.get("examples", []),
-                "damaged_market_examples": damaged_market.get("examples", []),
-                "fixed_market_query": fixed_market.get("query"),
-                "damaged_market_query": damaged_market.get("query"),
-            },
-        }
 
 
 def normalize(text: str) -> str:
     return text.strip().lower()
 
 
+def normalize_device_name(device_name: str) -> str:
+    device_lower = normalize(device_name)
+
+    aliases = getattr(config, "DEVICE_ALIASES", {})
+
+    for alias, canonical_name in aliases.items():
+        if alias in device_lower:
+            return canonical_name
+
+    for supported_device in config.MVP_SUPPORTED_DEVICES:
+        if supported_device in device_lower:
+            return supported_device
+
+    return device_lower
+
+
+def is_mvp_supported_device(device_name: str) -> bool:
+    return normalize(device_name) in config.MVP_SUPPORTED_DEVICES
+
+
 def normalize_condition(condition: str) -> str:
     cond = normalize(condition)
 
-    screen_keywords = [
-        "cracked screen",
-        "screen cracked",
-        "broken screen",
-        "screen broken",
-        "damaged screen",
-        "damaged display",
-        "broken display",
-        "lcd damage",
-        "screen damage",
-    ]
+    condition_aliases = getattr(config, "CONDITION_ALIASES", {})
 
-    battery_keywords = [
-        "battery issue",
-        "bad battery",
-        "battery degraded",
-        "battery replacement",
-        "battery problem",
-        "doesn't hold charge",
-        "does not hold charge",
-        "drains fast",
-    ]
-
-    works_keywords = [
-        "works fine",
-        "working",
-        "functional",
-        "no issue",
-        "no issues",
-        "good condition",
-    ]
-
-    if any(keyword in cond for keyword in screen_keywords):
-        return "cracked screen"
-
-    if any(keyword in cond for keyword in battery_keywords):
-        return "battery issue"
-
-    if any(keyword in cond for keyword in works_keywords):
-        return "works fine"
+    for canonical_condition, aliases in condition_aliases.items():
+        if any(alias in cond for alias in aliases):
+            return canonical_condition
 
     return "unknown"
 
@@ -277,13 +264,9 @@ def get_device_category(device_name: str) -> str:
 
 
 def condition_to_repair_key(condition: str) -> str:
-    if condition == "cracked screen":
-        return "screen"
+    condition_map = getattr(config, "CONDITION_TO_REPAIR_KEY", {})
 
-    if condition == "battery issue":
-        return "battery"
-
-    return "default"
+    return condition_map.get(condition, "default")
 
 
 def load_repair_prices() -> dict:
@@ -296,7 +279,7 @@ def load_repair_prices() -> dict:
         return {}
 
 
-def get_scraped_repair_cost(device_name: str, condition: str) -> dict:
+def get_static_repair_cost(device_name: str, condition: str) -> dict:
     repair_prices = load_repair_prices()
     device_key = normalize(device_name)
     repair_key = condition_to_repair_key(condition)
@@ -328,19 +311,26 @@ def get_scraped_repair_cost(device_name: str, condition: str) -> dict:
     return {
         "success": True,
         "price": float(price),
-        "source": repair_data.get("source", "local_repair_prices"),
+        "source": repair_data.get("source", "static_repair_prices"),
         "url": repair_data.get("url"),
     }
 
 
 def get_repair_cost(device_name: str, condition: str) -> dict:
-    scraped = get_scraped_repair_cost(device_name, condition)
-
-    if scraped["success"]:
+    if condition == "works fine":
         return {
-            "price": scraped["price"],
-            "source": scraped["source"],
-            "url": scraped.get("url"),
+            "price": 0.0,
+            "source": "no_repair_needed",
+            "url": None,
+        }
+
+    static_price = get_static_repair_cost(device_name, condition)
+
+    if static_price["success"]:
+        return {
+            "price": static_price["price"],
+            "source": static_price["source"],
+            "url": static_price.get("url"),
         }
 
     category = get_device_category(device_name)
@@ -356,42 +346,14 @@ def get_repair_cost(device_name: str, condition: str) -> dict:
     }
 
 
-def fallback_as_is_value(market_price: float, condition: str) -> float:
-    multiplier = config.CONDITION_MULTIPLIERS.get(
-        condition,
-        config.CONDITION_MULTIPLIERS["default"],
-    )
-
-    return round(market_price * multiplier, 2)
-
-
-def compute_decision(net_value: float) -> tuple[str, str]:
-    """
-    Leader definition:
-
-    net_value =
-        fixed resale value
-        - repair cost
-        - broken resale value
-    """
-
-    if net_value > 0:
-        return (
-            "revive_it",
-            f"Repairing creates ${net_value:.2f} in net value."
-        )
-
-    return (
-        "recycle_it",
-        f"Repairing creates ${net_value:.2f} in net value."
-    )
-
-
 def build_repair_option_name(
     device_name: str,
     condition: str,
     source: str,
 ) -> str:
+    if source == "no_repair_needed":
+        return "No repair needed"
+
     if source.endswith("_official"):
         brand = source.replace("_official", "").title()
         return f"{brand} official repair"
@@ -399,7 +361,7 @@ def build_repair_option_name(
     if source == "apple_official_manual":
         return "Apple official repair"
 
-    if source == "config_baseline_estimate":
+    if source in {"fallback_estimate", "config_baseline_estimate"}:
         return f"Estimated {condition} repair"
 
     return f"{device_name} repair option"
@@ -418,7 +380,7 @@ if __name__ == "__main__":
     for device, condition, zip_code in test_cases:
         print("=" * 80)
         print(
-            service.analyze_repair_value(
+            service.get_repair_estimate(
                 device_name=device,
                 condition=condition,
                 zip_code=zip_code,

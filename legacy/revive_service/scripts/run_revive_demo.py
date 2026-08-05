@@ -20,7 +20,7 @@ def main() -> None:
 
     for device_name, condition, zip_code in cases:
         print("=" * 80)
-        result = service.analyze_repair_value(
+        result = service.get_repair_estimate(
             device_name=device_name,
             condition=condition,
             zip_code=zip_code,
