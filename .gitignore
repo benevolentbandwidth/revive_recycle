@@ -40,7 +40,11 @@ npm-debug.log*
 
 # Firebase
 # .firebaserc holds the real GCP project id and is not committed while infra is
-# being provisioned (Phase 0 task 6). Copy .firebaserc.example to .firebaserc.
+# being provisioned (plan task 0.2). Copy .firebaserc.example to .firebaserc.
 .firebaserc
 .firebase/
 firebase-debug.log*
+
+# Issue drafts — working documents for filing GitHub issues from
+# Implementation-Plan.md. Local scratch, not part of the build.
+issues-*.md
