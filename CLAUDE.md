@@ -45,7 +45,7 @@ Still true at root:
 
 | Path | Status |
 |---|---|
-| [README.md](README.md) | **Stale.** Describes the Streamlit/Gemini app and a 10-device MVP. PRD says 20 devices, no photo detection. Rewrite is task 4.9. |
+| [README.md](README.md) | **Current.** Rewritten per PRD v2 specs (Task 4.9). |
 
 [web/](web/) is the **Track C frontend scaffold** — Next.js 16 (App Router) + React 19
 + Tailwind 4 + TypeScript, configured for static export to Firebase Hosting. It runs
