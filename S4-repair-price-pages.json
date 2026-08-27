@@ -1,0 +1,433 @@
+{
+  "generated": "2026-08-24",
+  "checked_sources": {
+    "manufacturer": ["Apple", "Microsoft"],
+    "chains": ["uBreakiFix", "CPR Cell Phone Repair"],
+    "parts": ["iFixit"]
+  },
+  "devices": [
+    {
+      "device_id": "iphone-14",
+      "repairs": [
+        {
+          "tag": "screen",
+          "sources": [
+            {
+              "source_type": "manufacturer",
+              "publisher": "Apple",
+              "url": "https://support.apple.com/iphone/repair/screen-replacement",
+              "note": "Interactive device/model picker; select Device Type = iPhone 14, Model = iPhone 14. Also shows Rear camera damage on the same page (see camera below)."
+            },
+            {
+              "source_type": "parts",
+              "publisher": "iFixit",
+              "url": "https://www.ifixit.com/Parts/iPhone_14/Screens",
+              "note": "Kit vs. part-only SKUs."
+            }
+          ]
+        },
+        {
+          "tag": "battery",
+          "sources": [
+            {
+              "source_type": "manufacturer",
+              "publisher": "Apple",
+              "url": "https://support.apple.com/iphone/repair/battery-replacement",
+              "note": "Same interactive tool family as screen-replacement."
+            },
+            {
+              "source_type": "parts",
+              "publisher": "iFixit",
+              "url": "https://www.ifixit.com/Parts/iPhone_14/Batteries",
+              "note": "Kit vs. part-only SKUs."
+            }
+          ]
+        },
+        {
+          "tag": "wont-power-on",
+          "sources": [],
+          "nothing_found": true
+        },
+        {
+          "tag": "water-damage",
+          "sources": [],
+          "nothing_found": true
+        },
+        {
+          "tag": "charging-port",
+          "sources": [
+            {
+              "source_type": "parts",
+              "publisher": "iFixit",
+              "url": "https://www.ifixit.com/Parts/iPhone_14/Ports",
+              "note": "Lightning Connector Assembly."
+            }
+          ]
+        },
+        {
+          "tag": "speaker",
+          "sources": [
+            {
+              "source_type": "manufacturer",
+              "publisher": "Apple",
+              "url": "https://selfservicerepair.com/en-US/iphone-14/bottom-speaker",
+              "note": "Self Service Repair store. Bottom Speaker (main loudspeaker).'"
+            },
+            {
+              "source_type": "manufacturer",
+              "publisher": "Apple",
+              "url": "https://selfservicerepair.com/en-US/iphone-14/top-speaker",
+              "note": "Self Service Repair store. Top Speaker (earpiece speaker). Separate part, same price as Bottom Speaker."
+            },
+            {
+              "source_type": "parts",
+              "publisher": "iFixit",
+              "url": "https://www.ifixit.com/Parts/iPhone_14/Speakers",
+              "note": "Loudspeaker and Earpiece Speaker, separate SKUs. Matches Apple's bottom/top speaker split above."
+            }
+          ]
+        },
+        {
+          "tag": "camera",
+          "sources": [
+            {
+              "source_type": "manufacturer",
+              "publisher": "Apple",
+              "url": "https://support.apple.com/iphone/repair/screen-replacement",
+              "note": "Same interactive tool as screen; priced row 'Rear camera damage'."
+            },
+            {
+              "source_type": "parts",
+              "publisher": "iFixit",
+              "url": "https://www.ifixit.com/Parts/iPhone_14/Cameras",
+              "note": "Rear Camera Assembly, Front Camera Assembly."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "device_id": "macbook-air-m2",
+      "repairs": [
+        {
+          "tag": "screen",
+          "sources": [
+            {
+              "source_type": "manufacturer",
+              "publisher": "Apple",
+              "url": "https://selfservicerepair.com/en-US/macbook-air-m2-2022/display",
+              "note": "Self Service Repair store. Select Product = Mac laptops, Product model = MacBook Air (M2, 2022), Repair type = Display. This is the DIY-parts store and it is priced, separate from support.apple.com/ (the AppleCare-style paid-service estimator which bundles this under an unpriced 'Other damage' line)."
+            },
+            {
+              "source_type": "parts",
+              "publisher": "iFixit",
+              "url": "https://www.ifixit.com/Parts/Macbook_Air_M2_2022/Screens",
+              "note": "Display Assembly."
+            }
+          ]
+        },
+        {
+          "tag": "battery",
+          "sources": [
+            {
+              "source_type": "manufacturer",
+              "publisher": "Apple",
+              "url": "https://selfservicerepair.com/en-US/macbook-air-m2-2022/battery",
+              "note": "Self Service Repair store, DIY parts price."
+            },
+            {
+              "source_type": "manufacturer",
+              "publisher": "Apple",
+              "url": "https://support.apple.com/mac-laptops/repair?services=service",
+              "note": "AppleCare-style paid-service estimator (a different Apple property from the SSR store above- this is Apple doing the repair). Select Device Type = MacBook Air, Model = MacBook Air (M2, 2022). 'Battery service' renders a real model-specific price."
+            },
+            {
+              "source_type": "parts",
+              "publisher": "iFixit",
+              "url": "https://www.ifixit.com/Parts/Macbook_Air_M2_2022/Batteries",
+              "note": "Standalone Battery. The 'Upper Case Assembly and Battery' combo part is a different part, filed under /Case_Components- see keyboard-trackpad below."
+            }
+          ]
+        },
+        {
+          "tag": "wont-power-on",
+          "sources": [],
+          "nothing_found": true
+        },
+        {
+          "tag": "water-damage",
+          "sources": [],
+          "nothing_found": true
+        },
+        {
+          "tag": "charging-port",
+          "sources": [
+            {
+              "source_type": "manufacturer",
+              "publisher": "Apple",
+              "url": "https://selfservicerepair.com/en-US/macbook-air-m2-2022/magsafe-3-board",
+              "note": "Self Service Repair store. MagSafe 3 Board — the MacBook Air M2's charging port. (USB-C Boards is a separate repair type on the same store, for the other charging path)."
+            },
+            {
+              "source_type": "parts",
+              "publisher": "iFixit",
+              "url": "https://www.ifixit.com/Parts/Macbook_Air_M2_2022/MagSafe_Boards",
+              "note": "MagSafe DC-In Board."
+            }
+          ]
+        },
+        {
+          "tag": "speaker",
+          "sources": [
+            {
+              "source_type": "manufacturer",
+              "publisher": "Apple",
+              "url": "https://selfservicerepair.com/en-US/macbook-air-m2-2022/left-speaker-with-antenna",
+              "note": "Self Service Repair store. 'Left Speaker with Antenna' and 'Right Speaker with Antenna' are two separate repair-type filter entries, but both resolve to one combined part.'"
+            },
+            {
+              "source_type": "parts",
+              "publisher": "iFixit",
+              "url": "https://www.ifixit.com/Parts/Macbook_Air_M2_2022/Speakers",
+              "note": "Left Speaker and Right Speaker SKUs."
+            }
+          ]
+        },
+        {
+          "tag": "keyboard-trackpad",
+          "sources": [
+            {
+              "source_type": "manufacturer",
+              "publisher": "Apple",
+              "url": "https://selfservicerepair.com/en-US/macbook-air-m2-2022/top-case-with-keyboard",
+              "note": "Self Service Repair store. Top Case with Keyboard. A separate 'Trackpad and Trackpad Flex Cable' repair type also exists on the same store."
+            },
+            {
+              "source_type": "parts",
+              "publisher": "iFixit",
+              "url": "https://www.ifixit.com/Parts/Macbook_Air_M2_2022/Case_Components",
+              "note": "Upper Case Assembly and Battery (a combo part; includes the keyboard, excludes the trackpad)."
+            },
+            {
+              "source_type": "parts",
+              "publisher": "iFixit",
+              "url": "https://www.ifixit.com/Parts/Macbook_Air_M2_2022/Trackpads",
+              "note": "Trackpad, priced separately from the keyboard/upper-case part above."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "device_id": "surface-pro-9",
+      "repairs": [
+        {
+          "tag": "screen",
+          "sources": [
+            {
+              "source_type": "manufacturer",
+              "publisher": "Microsoft",
+              "url": "https://support.microsoft.com/en-us/surface/hardware-warranty/how-much-does-out-of-warranty-service-cost-for-your-device-or-accessory-united-states",
+              "note": "Intel: dedicated 'Screen or physical damage repair' line. 5G: folded into the single flat device-level repair price shared with wont-power-on, water-damage, charging-port, speaker, hinge-kickstand."
+            },
+            {
+              "source_type": "parts",
+              "publisher": "iFixit",
+              "url": "https://www.ifixit.com/products/surface-pro-9-screen-genuine",
+              "note": "Intel variant SKU."
+            },
+            {
+              "source_type": "parts",
+              "publisher": "iFixit",
+              "url": "https://www.ifixit.com/products/surface-pro-9-5g-screen-genuine",
+              "note": "5G variant SKU, separate part."
+            }
+          ]
+        },
+        {
+          "tag": "battery",
+          "sources": [
+            {
+              "source_type": "manufacturer",
+              "publisher": "Microsoft",
+              "url": "https://support.microsoft.com/en-us/surface/hardware-warranty/how-much-does-out-of-warranty-service-cost-for-your-device-or-accessory-united-states",
+              "note": "Only tag with its own dedicated line on both Intel and 5G, does not collapse into the 5G bundle."
+            },
+            {
+              "source_type": "parts",
+              "publisher": "iFixit",
+              "url": "https://www.ifixit.com/products/surface-pro-9-battery-genuine",
+              "note": "Intel variant SKU."
+            },
+            {
+              "source_type": "parts",
+              "publisher": "iFixit",
+              "url": "https://www.ifixit.com/products/surface-pro-9-5g-battery-genuine",
+              "note": "5G variant SKU, different part."
+            }
+          ]
+        },
+        {
+          "tag": "wont-power-on",
+          "sources": [
+            {
+              "source_type": "manufacturer",
+              "publisher": "Microsoft",
+              "url": "https://support.microsoft.com/en-us/surface/hardware-warranty/how-much-does-out-of-warranty-service-cost-for-your-device-or-accessory-united-states",
+              "note": "No line item specific to this symptom. Intel: would fall under Microsoft's priced 'General repair (excludes liquid, screen & physical damage)' line, shared with charging-port and speaker. 5G: falls under the flat device-level bundle instead."
+            }
+          ]
+        },
+        {
+          "tag": "water-damage",
+          "sources": [
+            {
+              "source_type": "manufacturer",
+              "publisher": "Microsoft",
+              "url": "https://support.microsoft.com/en-us/surface/hardware-warranty/how-much-does-out-of-warranty-service-cost-for-your-device-or-accessory-united-states",
+              "note": "Intel: dedicated 'Liquid damage repair' line. 5G: no separate line, falls under the single flat bundle."
+            }
+          ]
+        },
+        {
+          "tag": "charging-port",
+          "sources": [
+            {
+              "source_type": "manufacturer",
+              "publisher": "Microsoft",
+              "url": "https://support.microsoft.com/en-us/surface/hardware-warranty/how-much-does-out-of-warranty-service-cost-for-your-device-or-accessory-united-states",
+              "note": "Same bundling as wont-power-on: Intel 'General repair' bucket, 5G flat bundle."
+            },
+            {
+              "source_type": "parts",
+              "publisher": "iFixit",
+              "url": "https://www.ifixit.com/products/surface-pro-9-surflink-genuine",
+              "note": "Intel variant SKU (Surface's charging port is called 'Surflink')."
+            },
+            {
+              "source_type": "parts",
+              "publisher": "iFixit",
+              "url": "https://www.ifixit.com/products/surface-pro-9-5g-surflink-genuine",
+              "note": "5G variant SKU."
+            }
+          ]
+        },
+        {
+          "tag": "speaker",
+          "sources": [
+            {
+              "source_type": "manufacturer",
+              "publisher": "Microsoft",
+              "url": "https://support.microsoft.com/en-us/surface/hardware-warranty/how-much-does-out-of-warranty-service-cost-for-your-device-or-accessory-united-states",
+              "note": "Same bundling as wont-power-on/charging-port."
+            },
+            {
+              "source_type": "parts",
+              "publisher": "iFixit",
+              "url": "https://www.ifixit.com/products/surface-pro-9-right-speaker-genuine",
+              "note": "Intel variant, one of two separate L/R SKUs."
+            },
+            {
+              "source_type": "parts",
+              "publisher": "iFixit",
+              "url": "https://www.ifixit.com/products/surface-pro-9-left-speaker-genuine",
+              "note": "Intel variant, second of two separate L/R SKUs."
+            },
+            {
+              "source_type": "parts",
+              "publisher": "iFixit",
+              "url": "https://www.ifixit.com/products/surface-pro-9-5g-speakers-genuine",
+              "note": "5G variant, single combined SKU covering both channels."
+            }
+          ]
+        },
+        {
+          "tag": "keyboard-trackpad",
+          "sources": [],
+          "nothing_found": true
+        },
+        {
+          "tag": "hinge-kickstand",
+          "sources": [
+            {
+              "source_type": "parts",
+              "publisher": "iFixit",
+              "url": "https://www.ifixit.com/products/surface-pro-9-kickstand-genuine",
+              "note": "Only one SKU found (compatibility field lists the Intel/Wi-Fi model number only)."
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "nothing_found": [
+    {
+      "device_id": "iphone-14",
+      "tag": "wont-power-on",
+      "reason": "Not a named repair category anywhere checked. Apple's tool has no line item for it (falls under an undifferentiated, unpriced 'Other damage' catch-all). uBreakiFix and CPR both offer a 'diagnostic' step but never price it."
+    },
+    {
+      "device_id": "iphone-14",
+      "tag": "water-damage",
+      "reason": "Same 'Other damage' catch-all on Apple. Chains list water damage as an offered service but don't publish a price for it."
+    },
+    {
+      "device_id": "macbook-air-m2",
+      "tag": "water-damage",
+      "reason": "Apple's Mac repair page bundles it under an unpriced 'Other damage — inspection required' line. Neither chain publishes a price."
+    },
+    {
+      "device_id": "macbook-air-m2",
+      "tag": "wont-power-on",
+      "reason": "Not a named repair category anywhere checked. The actual fix varies by diagnosis (battery, logic board, or something else) and no source prices it as one line item. Apple's Self Service Repair store does have a 'Logic Board' repair type for this model but won't show a price without a device serial number first."
+    },
+    {
+      "device_id": "surface-pro-9",
+      "tag": "keyboard-trackpad",
+      "reason": "The Type Cover is sold as a separate accessory and has no line item at all on Microsoft's device repair-pricing table. Neither chain lists or prices Surface keyboard/Type Cover service."
+    }
+  ],
+  "robots_txt": [
+    {
+      "domain": "support.apple.com",
+      "allowed": true,
+      "note": "Disallow rules only cover /kb/index search, /docs/product/*, support_app-tagged URLs, and manual PDFs. All repair-pricing paths used are unaffected."
+    },
+    {
+      "domain": "apple.com",
+      "allowed": true,
+      "note": "Disallow rules only cover shop/payment overlay paths and China-specific paths. Not used as a cited source in the end (see selfservicerepair.com note below) but checked for the battery-service reference page."
+    },
+    {
+      "domain": "selfservicerepair.com",
+      "allowed": true,
+      "note": "Apple's Self Service Repair store, official Apple-partner site. robots.txt returns 404, no robots.txt exists so unrestricted)."
+    },
+    {
+      "domain": "ubreakifix.com",
+      "allowed": true,
+      "note": "robots.txt is 'Allow: /' for User-agent: *, with disallows only on query-string variants (?store, ?appointment, ?quote, ?mail-in) and a Yandex/Baidu block. All plain repair-service paths checked are unaffected."
+    },
+    {
+      "domain": "cellphonerepair.com",
+      "allowed": true,
+      "note": "CPR's domain. No disallow rules under User-agent: * beyond the same query-string params as uBreakiFix."
+    },
+    {
+      "domain": "ifixit.com",
+      "allowed": true,
+      "note": "Plain /Parts/ and /products/ paths are allowed and were spot-checked. Disallow rules only cover /Parts*?*filter, /Parts*?*q=, /Store/Guide/*, cart, edit/history/diff, translate- none appear in any cited URL."
+    },
+    {
+      "domain": "microsoft.com",
+      "allowed": true,
+      "note": "www.microsoft.com's robots.txt disallows only cart/checkout and parameterized listing pages."
+    },
+    {
+      "domain": "support.microsoft.com",
+      "allowed": true,
+      "note": "Separate robots.txt from www.microsoft.com. Only disallows /search/ and /Search/. The hardware-warranty pricing page used is unaffected."
+    }
+  ],
+  "excluded_by_robots": []
+}
