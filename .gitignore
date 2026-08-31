@@ -4,7 +4,8 @@ __pycache__/
 venv/
 
 # Environment
-.env
+.env*
+!.env.example
 
 # Python
 __pycache__/

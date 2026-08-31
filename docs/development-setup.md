@@ -24,6 +24,18 @@ None of these ever go in `web/`. The frontend is a static export, so anything in
 `web/.env.example` is compiled straight into JavaScript the browser downloads —
 it's public by design.
 
+**`.env` is a local-dev-only convention — production keys don't live there.** In
+the deployed system:
+
+- The **pipeline** (GitHub Actions, monthly) reads its InferX/DeepSeek key from a
+  **GitHub Actions secret**.
+- The **Market Data Service** (the standalone Cloud Function) reads its SoldComps,
+  Google Places, and InferX/DeepSeek keys from **its own server-side config**
+  (a Cloud Function secret), not from a `.env` file and not from GitHub Actions.
+
+Both need their own copy of the InferX/DeepSeek key provisioned separately — it's
+one key from InferX, but two secrets to set up.
+
 ### SoldComps
 
 1. Go to https://sold-comps.com/ and create a free account.
@@ -53,10 +65,17 @@ See [InferX Help](https://model.inferx.net/help) for more information.
 ### Google Places API
 
 1. Go to https://console.cloud.google.com/ and sign in, or create a Google account if needed.
-2. Create a new project, or reuse a personal sandbox project.
+2. Create a new project, or reuse a personal sandbox project, and make sure it has a
+   **billing account attached** — Google requires one to enable or call Places API
+   (New) even while you're within the free usage tier.
 3. Open **APIs & Services → Library**, search for **Places API (New)**, and enable it.
 4. Open **APIs & Services → Credentials → Create Credentials → API key**.
-5. Restrict the key immediately: click into it and under **API restrictions** limit it to the Places API.
+5. Restrict the key immediately: click into it and under **API restrictions** limit
+   it to **Places API (New)** — note the "(New)", and don't pick the plain
+   **Places API** entry that also shows up in that list. They're two separate
+   entries in the console, one for the legacy API and one for the API you enabled
+   in step 3. Restricting to the wrong one produces a key that looks fine but
+   fails at request time.
 6. Save the key in your local `.env` file as `GOOGLE_PLACES_API_KEY`.
 
 See [Google Places API documentation](https://developers.google.com/maps/documentation/places/web-service/overview).
