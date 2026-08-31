@@ -70,12 +70,8 @@ See [InferX Help](https://model.inferx.net/help) for more information.
    (New) even while you're within the free usage tier.
 3. Open **APIs & Services → Library**, search for **Places API (New)**, and enable it.
 4. Open **APIs & Services → Credentials → Create Credentials → API key**.
-5. Restrict the key immediately: click into it and under **API restrictions** limit
-   it to **Places API (New)** — note the "(New)", and don't pick the plain
-   **Places API** entry that also shows up in that list. They're two separate
-   entries in the console, one for the legacy API and one for the API you enabled
-   in step 3. Restricting to the wrong one produces a key that looks fine but
-   fails at request time.
+5. Give it a name and restrict the key immediately: click into it and under **API restrictions** limit
+   it to **Places API (New)**.
 6. Save the key in your local `.env` file as `GOOGLE_PLACES_API_KEY`.
 
 See [Google Places API documentation](https://developers.google.com/maps/documentation/places/web-service/overview).
