@@ -1,0 +1,56 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://github.com/benevolentbandwidth/revive_recycle/schemas/classifier-response.schema.json",
+  "title": "Symptom Classifier response",
+  "description": "The one JSON object the session LLM (DeepSeek V4 Flash) returns per session, at form submit. See ../C1-classifier-response.md for the full spec and reasoning. This schema checks shape and the global S3 tag enum. It doesn't check that a tag or variant is applicable to the specific device_id in the response; that check needs the loaded device catalog and is M12's responsibility.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["device_id", "condition", "variant", "issues", "confidence"],
+  "properties": {
+    "device_id": {
+      "type": "string",
+      "description": "Echoed back from the device already selected on the Landing screen, in canonical kebab-case, e.g. 'iphone-14'. The model just returns this field it doesn't classify it. M12 hard-rejects a response whose device_id doesn't match the request's -- that's a validation failure, not a low-confidence case.",
+      "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$",
+      "minLength": 1
+    },
+    "condition": {
+      "description": "Normalized device condition. Both values exist because the Market Data Service's cache key treats condition as its own axis (PRD S6B.2). The v1 self-diagnosis flow only ever describes a device reported as broken, so this resolves to 'broken' in practice.",
+      "enum": ["working", "broken"]
+    },
+    "variant": {
+      "description": "The device's price-driving spec tier (catalog variant_key_field) in lowercase-kebab form, e.g. '128gb'; 'base' for a device with no variant axis; or null when it can't be resolved. Never a guess -- a wrong value here writes a wrong price into the shared 30-day market cache for every later user of that device/variant. A base device should never emit null.",
+      "type": ["string", "null"],
+      "pattern": "^([a-z0-9]+(-[a-z0-9]+)*|base)$"
+    },
+    "issues": {
+      "description": "Map of S3 tag id to an independent probability in [0, 1]. Values don't need to sum to 1 -- multiple issues can co-occur, e.g. water damage raising several tags at once. A tag left out is implicitly 0. Keys are restricted to the ten S3 tag ids, so an invented tag fails validation.",
+      "type": "object",
+      "minProperties": 1,
+      "propertyNames": {
+        "enum": [
+          "screen",
+          "battery",
+          "wont-power-on",
+          "water-damage",
+          "charging-port",
+          "speaker",
+          "camera",
+          "keyboard-trackpad",
+          "hinge-kickstand",
+          "overheating"
+        ]
+      },
+      "additionalProperties": {
+        "type": "number",
+        "minimum": 0,
+        "maximum": 1
+      }
+    },
+    "confidence": {
+      "description": "Confidence, in [0, 1], that the issues probabilities are complete enough to act on without a follow-up question. Scoped to issues only -- variant uncertainty is signaled separately, via variant: null. The threshold that triggers a follow-up is C6's call, measured against C2's test set.",
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1
+    }
+  }
+}
