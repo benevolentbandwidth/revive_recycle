@@ -71,13 +71,15 @@
               "source_type": "manufacturer",
               "publisher": "Apple",
               "url": "https://selfservicerepair.com/en-US/iphone-14/bottom-speaker",
-              "note": "Self Service Repair store. Bottom Speaker (main loudspeaker).'"
+              "note": "Self Service Repair store. Bottom Speaker (main loudspeaker).",
+              "requires_browser_ua": true
             },
             {
               "source_type": "manufacturer",
               "publisher": "Apple",
               "url": "https://selfservicerepair.com/en-US/iphone-14/top-speaker",
-              "note": "Self Service Repair store. Top Speaker (earpiece speaker). Separate part, same price as Bottom Speaker."
+              "note": "Self Service Repair store. Top Speaker (earpiece speaker). Separate part, same price as Bottom Speaker.",
+              "requires_browser_ua": true
             },
             {
               "source_type": "parts",
@@ -116,7 +118,8 @@
               "source_type": "manufacturer",
               "publisher": "Apple",
               "url": "https://selfservicerepair.com/en-US/macbook-air-m2-2022/display",
-              "note": "Self Service Repair store. Select Product = Mac laptops, Product model = MacBook Air (M2, 2022), Repair type = Display. This is the DIY-parts store and it is priced, separate from support.apple.com/ (the AppleCare-style paid-service estimator which bundles this under an unpriced 'Other damage' line)."
+              "note": "Self Service Repair store. Select Product = Mac laptops, Product model = MacBook Air (M2, 2022), Repair type = Display. This is the DIY-parts store and it is priced, separate from support.apple.com/ (the AppleCare-style paid-service estimator which bundles this under an unpriced 'Other damage' line).",
+              "requires_browser_ua": true
             },
             {
               "source_type": "parts",
@@ -133,7 +136,8 @@
               "source_type": "manufacturer",
               "publisher": "Apple",
               "url": "https://selfservicerepair.com/en-US/macbook-air-m2-2022/battery",
-              "note": "Self Service Repair store, DIY parts price."
+              "note": "Self Service Repair store, DIY parts price.",
+              "requires_browser_ua": true
             },
             {
               "source_type": "manufacturer",
@@ -166,7 +170,8 @@
               "source_type": "manufacturer",
               "publisher": "Apple",
               "url": "https://selfservicerepair.com/en-US/macbook-air-m2-2022/magsafe-3-board",
-              "note": "Self Service Repair store. MagSafe 3 Board — the MacBook Air M2's charging port. (USB-C Boards is a separate repair type on the same store, for the other charging path)."
+              "note": "Self Service Repair store. MagSafe 3 Board — the MacBook Air M2's charging port. (USB-C Boards is a separate repair type on the same store, for the other charging path).",
+              "requires_browser_ua": true
             },
             {
               "source_type": "parts",
@@ -183,7 +188,8 @@
               "source_type": "manufacturer",
               "publisher": "Apple",
               "url": "https://selfservicerepair.com/en-US/macbook-air-m2-2022/left-speaker-with-antenna",
-              "note": "Self Service Repair store. 'Left Speaker with Antenna' and 'Right Speaker with Antenna' are two separate repair-type filter entries, but both resolve to one combined part.'"
+              "note": "Self Service Repair store. 'Left Speaker with Antenna' and 'Right Speaker with Antenna' are two separate repair-type filter entries, but both resolve to one combined part.",
+              "requires_browser_ua": true
             },
             {
               "source_type": "parts",
@@ -200,7 +206,8 @@
               "source_type": "manufacturer",
               "publisher": "Apple",
               "url": "https://selfservicerepair.com/en-US/macbook-air-m2-2022/top-case-with-keyboard",
-              "note": "Self Service Repair store. Top Case with Keyboard. A separate 'Trackpad and Trackpad Flex Cable' repair type also exists on the same store."
+              "note": "Self Service Repair store. Top Case with Keyboard. A separate 'Trackpad and Trackpad Flex Cable' repair type also exists on the same store.",
+              "requires_browser_ua": true
             },
             {
               "source_type": "parts",
@@ -401,7 +408,7 @@
     {
       "domain": "selfservicerepair.com",
       "allowed": true,
-      "note": "Apple's Self Service Repair store, official Apple-partner site. robots.txt returns 404, no robots.txt exists so unrestricted)."
+      "note": "Apple's Self Service Repair store, official Apple-partner site. Correction: robots.txt itself returns 403, not 404 as first recorded here — checked with both curl's default UA and python-requests; a browser User-Agent gets 200. The same 403 applies to the repair pages themselves, not just robots.txt. allowed: true still stands (there is no disallow rule blocking these paths), but a plain Python fetch is blocked outright and needs a browser User-Agent to get through — see requires_browser_ua on the 7 affected source entries (6 device/tag pairs)."
     },
     {
       "domain": "ubreakifix.com",
@@ -416,7 +423,7 @@
     {
       "domain": "ifixit.com",
       "allowed": true,
-      "note": "Plain /Parts/ and /products/ paths are allowed and were spot-checked. Disallow rules only cover /Parts*?*filter, /Parts*?*q=, /Store/Guide/*, cart, edit/history/diff, translate- none appear in any cited URL."
+      "note": "The User-agent: * check below is accurate but incomplete: robots.txt actually defines ~30 named user-agent groups, several with Disallow: /, including Scrapy — fetchability depends on which UA the pipeline sends, not just what * allows. Plain /Parts/ and /products/ paths are allowed for * and were spot-checked; Disallow rules under * only cover /Parts*?*filter, /Parts*?*q=, /Store/Guide/*, cart, edit/history/diff, translate- none appear in any cited URL. iFixit's robots.txt also now carries a Content-Signal: ai-train=no header and a commercial-use ToU line, worth flagging for every iFixit source entry in this file even though it doesn't change allowed here."
     },
     {
       "domain": "microsoft.com",
@@ -426,7 +433,7 @@
     {
       "domain": "support.microsoft.com",
       "allowed": true,
-      "note": "Separate robots.txt from www.microsoft.com. Only disallows /search/ and /Search/. The hardware-warranty pricing page used is unaffected."
+      "note": "Correction: not just /search/ and /Search/ — separate robots.txt from www.microsoft.com with ~20 disallow rules, including /support/ and /api/. The hardware-warranty pricing page cited here is still allowed; the /search/-only description above was wrong."
     }
   ],
   "excluded_by_robots": []

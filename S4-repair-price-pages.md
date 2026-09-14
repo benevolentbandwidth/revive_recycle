@@ -29,7 +29,21 @@ selection or in-person visit) so they're not used as a pricing source.
 
 **Robots.txt:** all 8 domains used (support.apple.com, apple.com, selfservicerepair.com,
 ubreakifix.com, cellphonerepair.com, ifixit.com, microsoft.com, support.microsoft.com) allow the
-paths cited, nothing in the JSON was excluded. 
+paths cited under robots.txt — nothing in the JSON is excluded by a disallow rule. Two caveats on
+top of "allowed," both recorded per-entry in the JSON (see `robots_txt` and, on the affected
+source entries, `requires_browser_ua`):
+
+- **selfservicerepair.com** 403s a default curl/python-requests UA on both robots.txt itself and
+  the repair pages (not a 404, as first recorded here); a browser UA gets 200 on both.
+  `allowed: true` still stands — nothing disallows these paths — but a plain Python fetch is
+  blocked outright and needs a browser User-Agent. Affects 7 source entries across 6 device/tag
+  pairs.
+- **ifixit.com**'s `User-agent: *` group is what "allowed" checks above, but the file actually
+  defines ~30 named UA groups, several `Disallow: /`, including Scrapy — fetchability depends on
+  which UA the pipeline sends. iFixit's robots.txt also now carries a `Content-Signal: ai-train=no`
+  header and a commercial-use ToU line.
+- **support.microsoft.com**'s disallow list is not just `/search/` — it's ~20 rules including
+  `/support/` and `/api/`. The hardware-warranty page cited here is unaffected either way.
 
 ## Reasoning
 
@@ -45,6 +59,12 @@ of the tags.
 Intel breaks out screen, liquid damage, and battery as their own lines, plus one  "General repair 
 (excludes liquid, screen & physical damage)" bucket covering wont-power-on, charging-port, and 
 speaker together; 5G collapses everything except battery into a single flat repair price.
+
+**For S5:** this bucket is one figure covering three tags (`wont-power-on`, `charging-port`,
+`speaker` on Intel; everything but `battery` on 5G). Without a way to mark that in the catalog,
+weighted cost sums the same repair price once per tag and triple-counts it — a device with all
+three symptoms would price the bucket three times over instead of once. S5's `repair_costs[]`
+entries need a `bundled_with` field (or equivalent) so weighting prices the bucket once.
 
 **`wont-power-on` gets different treatment by device.** On iPhone and MacBook it falls under 
 Apple's "Other damage" catch-all, which has no price. On Surface Pro the bucket ("General repair
@@ -62,3 +82,9 @@ Apple's "Other damage" catch-all, which has no price. On Surface Pro the bucket 
 - https://www.ifixit.com/products/surface-pro-9-*-genuine (per-part product pages, listed individually in the JSON)
 - https://www.ubreakifix.com (no prices found)
 - https://www.cellphonerepair.com (no prices found)
+
+## Open naming question
+
+This file's per-repair key is `tag` (matching S3's tag ids). The catalog's `repair_costs[]`
+schema (CLAUDE.md, PRD §10) calls the equivalent field `issue`. Same concept, two names — pick
+one before S6 so nothing has to remap between them.
