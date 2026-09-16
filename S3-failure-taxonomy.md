@@ -4,7 +4,7 @@ Researched Aug 20, 2026.
 
 ## Answer
 
-**Universal tags: apply to phone, tablet, and laptop:**
+**Universal issues: apply to phone, tablet, and laptop:**
 
 | id | label |
 |---|---|
@@ -37,15 +37,15 @@ Researched Aug 20, 2026.
 
 **Naming rules:**
 
-- Tag ids are kebab-case, matching device ids.
-- A tag only counts if a non-technical owner can say it without opening the device or
+- Issue ids are kebab-case, matching device ids.
+- An issue only counts if a non-technical owner can say it without opening the device or
   knowing a part name.
 - One shared vocabulary across device types, not one set per type: `battery` means the
   same thing on a phone and a laptop. Only the price behind it differs.
 
-**Don't invent new tags.** These strings are used in five places: the AI classification
+**Don't invent new issues.** These strings are used in five places: the AI classification
 prompt, the repair prices in the Device Catalog, the repair guides in the Device Catalog, 
-the tag buttons on the symptom form, and the hand-written seed file. A new tag means updating
+the issue buttons on the symptom form, and the hand-written seed file. A new issue means updating
 all five, so nobody adds one ad hoc, raise it so the taxonomy gets updated once.
 
 ## Reasoning
@@ -57,7 +57,7 @@ Primary source was iFixit's guide and parts pages for each device. Cross-checked
 (phone/tablet only) are iFixit repairs, but too similar to `screen`/`wont-power-on`.
 
 **Checking this holds past the three S2 devices:** phone/tablet is fine, checked against
-Samsung, Pixel, and iPad, nothing there needs a tag we don't have. Laptop needed the
-overheating tag added. It's not in the M2 MacBook Air's iFixit listings because that
+Samsung, Pixel, and iPad, nothing there needs an issue we don't have. Laptop needed the
+overheating issue added. It's not in the M2 MacBook Air's iFixit listings because that
 model is fanless, so nothing to fail or replace. Dell, HP, and Lenovo laptops have fans 
 and overheating/fan failure is a commonly reported laptop repair.

@@ -24,7 +24,7 @@ Read in this order when a question is about intent rather than code:
    See "Work tracking" below. There is no separate plan document any more.
 4. [S2-choose-3-devices.md](S2-choose-3-devices.md) — the three devices we build
    against, their variable fields, and why each was picked. Settles S2 (#31).
-5. [S3-failure-taxonomy.md](S3-failure-taxonomy.md) — the canonical failure tags.
+5. [S3-failure-taxonomy.md](S3-failure-taxonomy.md) — the canonical failure issues.
    Settles S3 (#32). Load-bearing: see "Conventions".
 6. [competitive-analysis.md](competitive-analysis.md) — positioning context.
 7. [legacy/README.md](legacy/README.md) — what the old prototype did and which parts
@@ -231,7 +231,7 @@ Progress indicator: **1 Describe · 2 Explore · 3 Estimate · 4 Decide**
 ```
 1  Landing (search / browse device chips — 3 in       Step 1
    the build, 20 at launch)
-2  Self-diagnosis form (zip, free text, tags,       Step 1
+2  Self-diagnosis form (zip, free text, issues,     Step 1
    storage/variant, water damage)
    └ "See my results" fires the ONE LLM call
 3b Follow-up — only on low LLM confidence OR        Step 1
@@ -353,23 +353,23 @@ paid calls — matters during development and not just in production.
 
   Secondary fields (RAM, 5G) offer a "not sure" option. `base` where a device has no
   variant axis.
-- **Failure taxonomy tags are the linchpin** — the LLM prompt, catalog `repair_costs[]`,
-  catalog `guides[]`, form tags, and the seed file all key off the same strings.
-  Changing a tag means changing five things. **Do not invent one ad hoc**; raise it and
+- **Failure taxonomy issues are the linchpin** — the LLM prompt, catalog `repair_costs[]`,
+  catalog `guides[]`, form issues, and the seed file all key off the same strings.
+  Changing an issue means changing five things. **Do not invent one ad hoc**; raise it and
   let the taxonomy be updated once. Settled in S3 ([write-up](S3-failure-taxonomy.md)):
 
-  | Scope | Tags |
+  | Scope | Issues |
   |---|---|
   | All device types | `screen` · `battery` · `wont-power-on` · `water-damage` · `charging-port` · `speaker` |
   | Phone / tablet | `camera` |
   | Laptop and 2-in-1 | `keyboard-trackpad` · `hinge-kickstand` · `overheating` |
 
-  A tag only qualifies if a non-technical owner could say it without opening the device
+  An issue only qualifies if a non-technical owner could say it without opening the device
   or knowing a part name. One shared vocabulary across device types — `battery` means
   the same thing on a phone and a laptop; only the price behind it differs.
 - **The session LLM never joins the lookup key.** It returns `device_id`, `condition`
   (`working` | `broken`) and `variant` as three separate values; the service composes
-  them (C1 #88, M3 #56, M12 #65). Its schema must reject an invented failure tag.
+  them (C1 #88, M3 #56, M12 #65). Its schema must reject an invented failure issue.
 - Two phrasings of the same device/condition/variant **must** normalize to the same
   key — that is what makes the cache work and it is an acceptance criterion.
 - Every price entry carries `as_of` and at least one source URL. No exceptions — a
