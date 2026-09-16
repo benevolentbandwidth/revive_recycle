@@ -122,10 +122,13 @@ for chunk in stream:
 
 **Google Places API**
 
-Terminal (from project root):
+Terminal:
 ```bash
-cd legacy/recycle_service
-python -m tests.test_google_places
+curl -X POST "https://places.googleapis.com/v1/places:searchText" \
+  -H "Content-Type: application/json" \
+  -H "X-Goog-Api-Key: $GOOGLE_PLACES_API_KEY" \
+  -H "X-Goog-FieldMask: places.displayName,places.formattedAddress" \
+  -d '{"textQuery":"e-waste recycling near 10001"}'
 ```
 
 **iFixit**
