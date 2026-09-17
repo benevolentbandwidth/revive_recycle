@@ -10,7 +10,7 @@
       "device_id": "iphone-14",
       "repairs": [
         {
-          "tag": "screen",
+          "issue": "screen",
           "sources": [
             {
               "source_type": "manufacturer",
@@ -27,7 +27,7 @@
           ]
         },
         {
-          "tag": "battery",
+          "issue": "battery",
           "sources": [
             {
               "source_type": "manufacturer",
@@ -44,17 +44,17 @@
           ]
         },
         {
-          "tag": "wont-power-on",
+          "issue": "wont-power-on",
           "sources": [],
           "nothing_found": true
         },
         {
-          "tag": "water-damage",
+          "issue": "water-damage",
           "sources": [],
           "nothing_found": true
         },
         {
-          "tag": "charging-port",
+          "issue": "charging-port",
           "sources": [
             {
               "source_type": "parts",
@@ -65,7 +65,7 @@
           ]
         },
         {
-          "tag": "speaker",
+          "issue": "speaker",
           "sources": [
             {
               "source_type": "manufacturer",
@@ -90,7 +90,7 @@
           ]
         },
         {
-          "tag": "camera",
+          "issue": "camera",
           "sources": [
             {
               "source_type": "manufacturer",
@@ -112,7 +112,7 @@
       "device_id": "macbook-air-m2",
       "repairs": [
         {
-          "tag": "screen",
+          "issue": "screen",
           "sources": [
             {
               "source_type": "manufacturer",
@@ -130,7 +130,7 @@
           ]
         },
         {
-          "tag": "battery",
+          "issue": "battery",
           "sources": [
             {
               "source_type": "manufacturer",
@@ -154,17 +154,17 @@
           ]
         },
         {
-          "tag": "wont-power-on",
+          "issue": "wont-power-on",
           "sources": [],
           "nothing_found": true
         },
         {
-          "tag": "water-damage",
+          "issue": "water-damage",
           "sources": [],
           "nothing_found": true
         },
         {
-          "tag": "charging-port",
+          "issue": "charging-port",
           "sources": [
             {
               "source_type": "manufacturer",
@@ -182,7 +182,7 @@
           ]
         },
         {
-          "tag": "speaker",
+          "issue": "speaker",
           "sources": [
             {
               "source_type": "manufacturer",
@@ -200,7 +200,7 @@
           ]
         },
         {
-          "tag": "keyboard-trackpad",
+          "issue": "keyboard-trackpad",
           "sources": [
             {
               "source_type": "manufacturer",
@@ -229,7 +229,7 @@
       "device_id": "surface-pro-9",
       "repairs": [
         {
-          "tag": "screen",
+          "issue": "screen",
           "sources": [
             {
               "source_type": "manufacturer",
@@ -252,13 +252,13 @@
           ]
         },
         {
-          "tag": "battery",
+          "issue": "battery",
           "sources": [
             {
               "source_type": "manufacturer",
               "publisher": "Microsoft",
               "url": "https://support.microsoft.com/en-us/surface/hardware-warranty/how-much-does-out-of-warranty-service-cost-for-your-device-or-accessory-united-states",
-              "note": "Only tag with its own dedicated line on both Intel and 5G, does not collapse into the 5G bundle."
+              "note": "The only issue with its own dedicated line on both Intel and 5G, does not collapse into the 5G bundle."
             },
             {
               "source_type": "parts",
@@ -275,7 +275,7 @@
           ]
         },
         {
-          "tag": "wont-power-on",
+          "issue": "wont-power-on",
           "sources": [
             {
               "source_type": "manufacturer",
@@ -286,7 +286,7 @@
           ]
         },
         {
-          "tag": "water-damage",
+          "issue": "water-damage",
           "sources": [
             {
               "source_type": "manufacturer",
@@ -297,7 +297,7 @@
           ]
         },
         {
-          "tag": "charging-port",
+          "issue": "charging-port",
           "sources": [
             {
               "source_type": "manufacturer",
@@ -320,7 +320,7 @@
           ]
         },
         {
-          "tag": "speaker",
+          "issue": "speaker",
           "sources": [
             {
               "source_type": "manufacturer",
@@ -349,12 +349,12 @@
           ]
         },
         {
-          "tag": "keyboard-trackpad",
+          "issue": "keyboard-trackpad",
           "sources": [],
           "nothing_found": true
         },
         {
-          "tag": "hinge-kickstand",
+          "issue": "hinge-kickstand",
           "sources": [
             {
               "source_type": "parts",
@@ -370,27 +370,27 @@
   "nothing_found": [
     {
       "device_id": "iphone-14",
-      "tag": "wont-power-on",
+      "issue": "wont-power-on",
       "reason": "Not a named repair category anywhere checked. Apple's tool has no line item for it (falls under an undifferentiated, unpriced 'Other damage' catch-all). uBreakiFix and CPR both offer a 'diagnostic' step but never price it."
     },
     {
       "device_id": "iphone-14",
-      "tag": "water-damage",
+      "issue": "water-damage",
       "reason": "Same 'Other damage' catch-all on Apple. Chains list water damage as an offered service but don't publish a price for it."
     },
     {
       "device_id": "macbook-air-m2",
-      "tag": "water-damage",
+      "issue": "water-damage",
       "reason": "Apple's Mac repair page bundles it under an unpriced 'Other damage — inspection required' line. Neither chain publishes a price."
     },
     {
       "device_id": "macbook-air-m2",
-      "tag": "wont-power-on",
+      "issue": "wont-power-on",
       "reason": "Not a named repair category anywhere checked. The actual fix varies by diagnosis (battery, logic board, or something else) and no source prices it as one line item. Apple's Self Service Repair store does have a 'Logic Board' repair type for this model but won't show a price without a device serial number first."
     },
     {
       "device_id": "surface-pro-9",
-      "tag": "keyboard-trackpad",
+      "issue": "keyboard-trackpad",
       "reason": "The Type Cover is sold as a separate accessory and has no line item at all on Microsoft's device repair-pricing table. Neither chain lists or prices Surface keyboard/Type Cover service."
     }
   ],
@@ -408,7 +408,7 @@
     {
       "domain": "selfservicerepair.com",
       "allowed": true,
-      "note": "Apple's Self Service Repair store, official Apple-partner site. Correction: robots.txt itself returns 403, not 404 as first recorded here — checked with both curl's default UA and python-requests; a browser User-Agent gets 200. The same 403 applies to the repair pages themselves, not just robots.txt. allowed: true still stands (there is no disallow rule blocking these paths), but a plain Python fetch is blocked outright and needs a browser User-Agent to get through — see requires_browser_ua on the 7 affected source entries (6 device/tag pairs)."
+      "note": "Apple's Self Service Repair store, official Apple-partner site. Correction: robots.txt itself returns 403, not 404 as first recorded here — checked with both curl's default UA and python-requests; a browser User-Agent gets 200. The same 403 applies to the repair pages themselves, not just robots.txt. allowed: true still stands (there is no disallow rule blocking these paths), but a plain Python fetch is blocked outright and needs a browser User-Agent to get through — see requires_browser_ua on the 7 affected source entries (6 device/issue pairs)."
     },
     {
       "domain": "ubreakifix.com",

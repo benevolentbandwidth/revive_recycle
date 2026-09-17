@@ -4,7 +4,7 @@ Researched Aug 24, 2026.
 
 ## Answer
 
-Full results in [`S4-repair-price-pages.json`](S4-repair-price-pages.json) — 22 device/tag pairs
+Full results in [`S4-repair-price-pages.json`](S4-repair-price-pages.json) — 22 device/issue pairs
 (iPhone 14 ×7, MacBook Air M2 ×7, Surface Pro 9 ×8), each with page links or an explicit
 "nothing found." 17 of 22 have at least one usable page.
 
@@ -36,7 +36,7 @@ source entries, `requires_browser_ua`):
 - **selfservicerepair.com** 403s a default curl/python-requests UA on both robots.txt itself and
   the repair pages (not a 404, as first recorded here); a browser UA gets 200 on both.
   `allowed: true` still stands — nothing disallows these paths — but a plain Python fetch is
-  blocked outright and needs a browser User-Agent. Affects 7 source entries across 6 device/tag
+  blocked outright and needs a browser User-Agent. Affects 7 source entries across 6 device/issue
   pairs.
 - **ifixit.com**'s `User-agent: *` group is what "allowed" checks above, but the file actually
   defines ~30 named UA groups, several `Disallow: /`, including Scrapy — fetchability depends on
@@ -53,16 +53,16 @@ and it resolves to a real priced page. `support.apple.com/mac-laptops/repair` is
 the AppleCare-style paid-service estimator where Apple does the repair instead of selling the
 part. It's shows a price once a model is selected; for MacBook Air (M2, 2022) only `battery` 
 gets a price, everything else stays under the same unpriced "Other damage" line as the rest 
-of the tags.
+of the issues.
 
-**Surface Pro 9 prices several tags as one shared bucket**, not per-tag and chip-dependent: 
+**Surface Pro 9 prices several issues as one shared bucket**, not per-issue and chip-dependent: 
 Intel breaks out screen, liquid damage, and battery as their own lines, plus one  "General repair 
 (excludes liquid, screen & physical damage)" bucket covering wont-power-on, charging-port, and 
 speaker together; 5G collapses everything except battery into a single flat repair price.
 
-**For S5:** this bucket is one figure covering three tags (`wont-power-on`, `charging-port`,
+**For S5:** this bucket is one figure covering three issues (`wont-power-on`, `charging-port`,
 `speaker` on Intel; everything but `battery` on 5G). Without a way to mark that in the catalog,
-weighted cost sums the same repair price once per tag and triple-counts it — a device with all
+weighted cost sums the same repair price once per issue and triple-counts it — a device with all
 three symptoms would price the bucket three times over instead of once. S5's `repair_costs[]`
 entries need a `bundled_with` field (or equivalent) so weighting prices the bucket once.
 
@@ -83,8 +83,9 @@ Apple's "Other damage" catch-all, which has no price. On Surface Pro the bucket 
 - https://www.ubreakifix.com (no prices found)
 - https://www.cellphonerepair.com (no prices found)
 
-## Open naming question
+## Naming — settled
 
-This file's per-repair key is `tag` (matching S3's tag ids). The catalog's `repair_costs[]`
-schema (CLAUDE.md, PRD §10) calls the equivalent field `issue`. Same concept, two names — pick
-one before S6 so nothing has to remap between them.
+This file's per-repair key was originally `tag`, while the catalog's `repair_costs[]` schema
+(CLAUDE.md, PRD §10) called the equivalent field `issue`. Same concept, two names. Settled in
+favor of `issue`, the term the schema and the weighted-cost math already used, so nothing has
+to remap when S6 (#35) freezes the catalog schema. This file now uses `issue` throughout.
