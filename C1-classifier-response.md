@@ -7,7 +7,7 @@ The Symptom Classifier returns this JSON object.
 | `device_id` | string | yes | Echoed back from the device already selected on the Landing screen. Not classified — see Reasoning. |
 | `condition` | `"working"` \| `"broken"` | yes | Normalized device condition. |
 | `variant` | string **or `null`** | yes | The device's spec tier, e.g. `"128gb"`. `"base"` when the device has no variant axis. **`null` means "could not be determined"** |
-| `issues` | object | yes | Map of S3 problem-tag id → probability. Keys restricted to the S3 taxonomy. Tags with probability 0 are omitted. |
+| `issues` | object | yes | Map of S3 failure-issue id → probability. Keys restricted to the S3 taxonomy. Issues with probability 0 are omitted. |
 | `confidence` | number, 0–1 | yes | Confidence in `issues` only (see below). |
 
 No other top-level fields. No joined `{device_id}__{condition}__{variant}` key, the model
@@ -16,17 +16,20 @@ the key.
 
 ### `issues`
 
-- Keys: the ten S3 tag ids — `screen`, `battery`, `wont-power-on`, `water-damage`,
+- Keys: the ten S3 issue ids — `screen`, `battery`, `wont-power-on`, `water-damage`,
   `charging-port`, `speaker`, `camera`, `keyboard-trackpad`, `hinge-kickstand`,
-  `overheating`. Any other key is a schema violation, an invented tag is invalid.
-- Values: independent per-tag probabilities, `0`–`1`. **Not a categorical distribution —
-  they are not required to sum to 1.** Multiple tags can be simultaneously high (a
+  `overheating`. Any other key is a schema violation — an invented issue is invalid.
+- Values: independent per-issue probabilities, `0`–`1`. **Not a categorical distribution —
+  they are not required to sum to 1.** Multiple issues can be simultaneously high (a
   `water-damage` report could raise `screen`, `battery`, `speaker`, and
-  `charging-port`).
-- A tag not present in the object is implicitly `0`.
+  `charging-port`). This is a deliberate reading of PRD §8: `weighted_low/high` = Σ (issue
+  probability × flat rate) is then the *expected total cost of the repairs the device
+  probably needs*, which can exceed any single repair when several co-occur. W10 (#76)
+  inherits that interpretation; PRD §8.2 now records it.
+- An issue not present in the object is implicitly `0`.
 - **Schema-level validity is not device-level validity.** This schema only knows the ten global
-  tag ids, doesn't know that `keyboard-trackpad` is meaningless for `iphone-14` because
-  that mapping lives in the device catalog. **M12 must additionally reject any tag the specific 
+  issue ids, doesn't know that `keyboard-trackpad` is meaningless for `iphone-14` because
+  that mapping lives in the device catalog. **M12 must additionally reject any issue the specific 
   `device_id`'s catalog entry doesn't list** even though it passes this schema. This mirrors the 
   existing split between S8 (shape) and P7 (sanity), format and plausibility are checked in different places.
 
@@ -43,9 +46,17 @@ the key.
 - One of the device's `variant_key_field` options (catalog-defined, e.g. `128gb`, `256gb`),
   in the same lowercase-kebab form as the catalog; or the literal `"base"` for a device
   with no variant axis; or **`null`**.
+- **Where it comes from.** The self-diagnosis form collects the `variant_key_field` (storage,
+  on all three build devices) as its own field — PRD §7.3 says the form prompts for it rather
+  than letting it be left blank. So in the normal case the model is *echoing the form's
+  storage answer in canonical form*, exactly as it echoes `device_id`; it is not mining the
+  free text for a storage size. The free text is only a fallback if the form value is
+  missing or contradictory, and C4's prompt must not be written to hunt for storage in
+  prose when the form already supplied it.
 - `null` is the *only* correct output when the variant can't be determined for a device
-  that has one. This can happen even when `issues`/`confidence` are high — a description
-  can be completely clear about a cracked screen while saying nothing about storage. C7
+  that has one — the form didn't supply a usable value and the free text doesn't settle it
+  either. This can happen even when `issues`/`confidence` are high — a description can be
+  completely clear about a cracked screen while the storage question went unanswered. C7
   needs to detect and signal that case independently of symptom confidence, and this
   schema gives it a direct, type-level way to do so: no numeric threshold to get right, no
   guessed value that a careless caller could accidentally use.
@@ -85,7 +96,8 @@ Consequently:
 }
 ```
 
-**Confident on symptoms, storage never mentioned** — "my macbook air screen is cracked":
+**Confident on symptoms, storage unresolved** — "my macbook air screen is cracked", with
+the form's storage field unanswered and nothing in the text to settle it:
 
 ```json
 {
@@ -121,8 +133,8 @@ of the fact that `variant` happened to resolve fine.
 [`schemas/classifier-response.schema.json`](schemas/classifier-response.schema.json) — JSON
 Schema Draft 7 (chosen for the widest validator support across languages/tooling; nothing
 in it depends on later-draft features, so M12 can swap drafts freely if its stack prefers
-one). Validates shape and the global tag enum only, per the split described above — it does
-not and cannot check per-device tag applicability, which needs the loaded catalog at
+one). Validates shape and the global issue enum only, per the split described above — it does
+not and cannot check per-device issue applicability, which needs the loaded catalog at
 request time.
 
 ## Reasoning
@@ -140,14 +152,14 @@ a bad variant corrupts a shared 30-day cache entry for everyone, the stronger gu
 worth it. `confidence` stays scoped to `issues`, which is the one field that's genuinely a 
 probability distribution rather than a resolved-or-not lookup value.
 
-**Why `issues` omits zero-probability tags instead of listing all applicable ones.** Kept
-the response minimal and lets C4's prompt focus on producing tags it actually detected
+**Why `issues` omits zero-probability issues instead of listing all applicable ones.** Kept
+the response minimal and lets C4's prompt focus on producing issues it actually detected
 rather than exhaustively scoring ones it didn't. If C3's scoring tool later needs to
 distinguish "ruled out" from "never evaluated," that's a C3/C8 concern to revisit against
 real measured behavior.
 
 **Why `device_id`/`condition` aren't treated as classification targets.** Every downstream
-issue that discusses uncertainty (C6, C7) talks about symptom confidence and storage/variant 
+GitHub issue that discusses uncertainty (C6, C7) talks about symptom confidence and storage/variant 
 resolution, never about the device or its condition being unclear. That's consistent with the 
 flow: device is picked explicitly before this call fires, and condition is fixed by the fact 
 that this whole flow is to diagnose a device the user says is broken. Treating them as 
@@ -155,16 +167,16 @@ passthrough-with-hard-validation (rather than probabilistic) keeps the schema's 
 uncertainty surfaces — `issues`/`confidence` and `variant` — the two things the prompt (C4) 
 and the test set (C2) need to reason about.
 
-**Why the tag enum is global rather than dynamically scoped per device.** The JSON Schema is
+**Why the issue enum is global rather than dynamically scoped per device.** The JSON Schema is
 static; it can't vary its own `enum` based on which `device_id` happens to be in the same
 document without a schema-per-device (or a schema compiled at request time from the
 catalog), either of adds complexity for a project designed to need minimal maintenance. 
-The global enum still satisfies C1's requirements — an invented tag is invalid — and the 
+The global enum still satisfies C1's requirements — an invented issue is invalid — and the 
 narrower per-device check is pushed to M12, which has the catalog loaded to do it. Same 
 shape-vs-plausibility split the project already uses for S8 (file shape) versus P7 (sanity band).
 
 **Why `schemas/` instead of root-level.** `S2-choose-3-devices.md` and
-`S3-failure-taxonomy.md` the issue-answer docs already live at repo root, which
+`S3-failure-taxonomy.md`, the GitHub-issue write-ups, already live at repo root, which
 this follows for `C1-classifier-response.md`. The JSON Schema is a different kind of
 artifact meant to be `require()`d/loaded by code (M12), so it goes in a new `schemas/` directory 
 rather than cluttering root with raw JSON. S8 ("write a JSON Schema for both [catalog] files") 
