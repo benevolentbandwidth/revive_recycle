@@ -1,10 +1,11 @@
-.env
 __pycache__/
 *.pyc
 .DS_Store
 venv/
+
 # Environment
-.env
+.env*
+!.env.example
 
 # Python
 __pycache__/
