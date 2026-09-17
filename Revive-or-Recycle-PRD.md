@@ -445,6 +445,7 @@ At runtime the frontend combines the LLM's per-issue probabilities with the cata
 - A **weighted cost to repair**, computed at each end of the range:
   - `weighted_low` = Σ (issue probability × issue `flat_rate.low`)
   - `weighted_high` = Σ (issue probability × issue `flat_rate.high`)
+  - The probabilities are **independent per issue, not a distribution that sums to 1** (C1, #88): several issues can be likely at once — water damage typically raises screen, battery, speaker, and charging port together. The weighted cost is therefore the expected total cost of the repairs the device probably needs, and can exceed any single repair.
 - A **net gain from repair**, likewise a range. Note the inversion — the cheaper repair produces the larger gain:
   - `net_gain_high` = working value − broken value − `weighted_low`
   - `net_gain_low` = working value − broken value − `weighted_high`
