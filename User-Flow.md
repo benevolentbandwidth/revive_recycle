@@ -19,7 +19,7 @@ Steps refer to the 4-stage progress indicator: **1 Describe · 2 Explore · 3 Es
    • Change selected device            → back to 1 · Landing (search/browse)
    • Enter ZIP code
    • Describe the problem (free text)
-   • Add symptom tags — Won't charge / Cracked screen / Battery / + custom tag
+   • Add symptom issues — Won't charge / Cracked screen / Battery / + custom issue
    • Set storage  ← feeds the market cache key (variant); prompt for it rather
                      than leaving it blank, since it drives pricing accuracy
    • Water damage — No / Yes
@@ -43,10 +43,10 @@ Steps refer to the 4-stage progress indicator: **1 Describe · 2 Explore · 3 Es
       │  • Continue                      → 2c-i · Guide list
       │
       └─ 2c-i · Guide list — iFixit, in-app  (Step 2 · Explore)
-         Guides are filtered to the failure tags the classification identified
+         Guides are filtered to the failure issues the classification identified
          and ranked by issue probability. Each shows title, difficulty, time.
          Options on screen:
-         • Open a guide (matched to your tags) — Screen / Battery / Charging port
+         • Open a guide (matched to your issues) — Screen / Battery / Charging port
               → 2c-ii · Guide reader
          • Back                          → 2 · Self-diagnosis form
          • Done — skip to estimate       → 2c-iii · Did this help?

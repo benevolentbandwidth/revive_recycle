@@ -20,11 +20,11 @@ Read in this order when a question is about intent rather than code:
    Architecture, data contracts, economic logic, acceptance criteria.
 2. [User-Flow.md](User-Flow.md) — screen-by-screen tree with the options on each screen.
 3. **The GitHub issues** — the live task breakdown, dependencies, and critical path.
-   Each issue states its own blockers, acceptance criteria, and what *not* to do.
+   Each GitHub issue states its own blockers, acceptance criteria, and what *not* to do.
    See "Work tracking" below. There is no separate plan document any more.
 4. [S2-choose-3-devices.md](S2-choose-3-devices.md) — the three devices we build
    against, their variable fields, and why each was picked. Settles S2 (#31).
-5. [S3-failure-taxonomy.md](S3-failure-taxonomy.md) — the canonical failure tags.
+5. [S3-failure-taxonomy.md](S3-failure-taxonomy.md) — the canonical failure issues.
    Settles S3 (#32). Load-bearing: see "Conventions".
 6. [competitive-analysis.md](competitive-analysis.md) — positioning context.
 7. [legacy/README.md](legacy/README.md) — what the old prototype did and which parts
@@ -33,7 +33,7 @@ Read in this order when a question is about intent rather than code:
 If code and the PRD disagree, the PRD wins **unless** the code is legacy prototype
 (see next section). Do not silently change PRD behaviour to match old code. Where a
 GitHub issue is more specific than the PRD — the three-device build scope, the
-Market Data Service's endpoint set — the issue is the newer decision and wins.
+Market Data Service's endpoint set — that GitHub issue is the newer decision and wins.
 
 ## ⚠️ Repo state: legacy prototype vs. target build
 
@@ -47,8 +47,8 @@ enforced by a `permissions.deny` rule in `.claude/settings.json`, not just by th
 [legacy/README.md](legacy/README.md) is the map: what each file was, whether it is
 **Drop** or **Harvest**, and which track harvests it. Two notes on reading it: its
 "two known risks" section is now resolved (see "Resolved decisions" below), and its
-links to `Implementation-Plan.md` are dead — that document was deleted when the issue
-tracker replaced it. `legacy/` is write-denied, so the dead links stay.
+links to `Implementation-Plan.md` are dead — that document was deleted when the
+GitHub issue tracker replaced it. `legacy/` is write-denied, so the dead links stay.
 
 Still true at root:
 
@@ -76,7 +76,7 @@ GitHub Actions → Python                     Browser (Next.js, static export, n
   ├ L2 fetch pages → DeepSeek extracts          ↓  and calls exactly ONE server-side thing:
   ├ L3 ±40% sanity band                       Market Data Service (Cloud Function, holds every key)
   │    in-band → accept                         ├→ classify → DeepSeek V4 Flash (ONE call, at submit)
-  │    out-of-band → keep old, open issue       ├→ price    → Firestore market_comps
+  │    out-of-band → keep old, GitHub issue     ├→ price    → Firestore market_comps
   ├ iFixit guide harvest                        │   HIT <30d → return · MISS/STALE → SoldComps → write back
   → device_catalog.json                         └→ places   → Google Places (one endpoint,
   → firebase deploy --only hosting                             place type is a parameter)
@@ -158,8 +158,8 @@ now states this outright; it was previously ambiguous.
     Quota exhausted → the repair side still renders. Never serve nothing.
 11. **The sanity band rejects, it does not queue for review.** An out-of-band value is
     not written; the old value survives and a GitHub issue is opened. If nobody ever
-    reads that issue, the tool keeps working. Human attention improves the data; its
-    absence must not break the product.
+    reads that GitHub issue, the tool keeps working. Human attention improves the
+    data; its absence must not break the product.
 12. **Every figure links back to a source.** Transparency is a product feature, not a
     nicety. Extraction with no supporting text in the fetched page returns null, not a
     guess.
@@ -215,9 +215,10 @@ item array is aggregated and discarded, never stored, never sent to the browser.
 `variant` is `base` when a device has no meaningful variant axis.
 
 **Freezing the catalog schema is the single highest-leverage task in the project** —
-essentially every remaining issue queues behind it. That is **S6 (#35)**, and it is
-still open. Beware: issue #26 ("Freeze the `device_catalog.json` schema") shows closed,
-but it was closed *as not planned* in the Aug renumbering, not because it was done.
+essentially every remaining GitHub issue queues behind it. That is **S6 (#35)**, and
+it is still open. Beware: GitHub issue #26 ("Freeze the `device_catalog.json` schema")
+shows closed, but it was closed *as not planned* in the Aug renumbering, not because
+it was done.
 
 Two derived fixtures unblock the Web App once S6 lands: **S9 (#38)** the test catalog —
 real S5 prices for the three devices, and it must contain one device whose repair range
@@ -231,7 +232,7 @@ Progress indicator: **1 Describe · 2 Explore · 3 Estimate · 4 Decide**
 ```
 1  Landing (search / browse device chips — 3 in       Step 1
    the build, 20 at launch)
-2  Self-diagnosis form (zip, free text, tags,       Step 1
+2  Self-diagnosis form (zip, free text, issues,     Step 1
    storage/variant, water damage)
    └ "See my results" fires the ONE LLM call
 3b Follow-up — only on low LLM confidence OR        Step 1
@@ -287,10 +288,10 @@ planning surface; if a plan-level decision needs recording, it belongs in this f
 the PRD.
 
 Work is grouped by **area, not by assignee**. Any contributor can claim from any group;
-the groups matter because issues within one share context and issues across them do not,
-which is what lets them run in parallel.
+the groups matter because GitHub issues within one share context and issues across
+them do not, which is what lets them run in parallel.
 
-| Prefix | Group | Issues |
+| Prefix | Group | GitHub issues |
 |---|---|---|
 | **S** | Setup — keys, research, schema freeze, contracts, fixtures | S1–S11 (#30–40) |
 | **P** | Catalog Pipeline — the monthly three-layer job | P1–P13 (#41–53) |
@@ -301,18 +302,19 @@ which is what lets them run in parallel.
 | **L** | Launch — remaining 17 devices, audits, docs, ship | L1–L15 (#101–111) |
 
 > **`M` means Market Data Service, not milestone.** The retired plan used M0–M4 for
-> milestones. If you see "M1" now, it is the Cloud Function issue.
+> milestones. If you see "M1" now, it is the Cloud Function GitHub issue.
 
-**Anything numbered `0.x` or `1.x` is dead.** Issues #21–#29 were closed **as not
-planned** on 2026-08-13 — superseded by the renumbering, *not* completed. Only two
-issues are genuinely done: **S2 (#31)** and **S3 (#32)**. Treat a closed `1.x` issue as
-evidence of nothing.
+**Anything numbered `0.x` or `1.x` is dead.** GitHub issues #21–#29 were closed **as
+not planned** on 2026-08-13 — superseded by the renumbering, *not* completed. Only two
+GitHub issues are genuinely done: **S2 (#31)** and **S3 (#32)**. Treat a closed `1.x`
+GitHub issue as evidence of nothing.
 
 ### Critical path
 
-**S5 (#34) → S6 (#35).** Those are the only two open issues carrying the `critical path`
-label, and essentially everything else waits on S6. The old path's first two links —
-infra provisioning and the device/taxonomy decisions — are done or gone.
+**S5 (#34) → S6 (#35).** Those are the only two open GitHub issues carrying the
+`critical path` label, and essentially everything else waits on S6. The old path's
+first two links — infra provisioning and the device/taxonomy decisions — are done or
+gone.
 
 **Startable right now, nothing blocking:** S1 (#30) dev keys · S4 (#33) pricing-page
 registry · S5 (#34) the three devices' prices · W2 (#68) progress bar · L12–L14
@@ -353,23 +355,23 @@ paid calls — matters during development and not just in production.
 
   Secondary fields (RAM, 5G) offer a "not sure" option. `base` where a device has no
   variant axis.
-- **Failure taxonomy tags are the linchpin** — the LLM prompt, catalog `repair_costs[]`,
-  catalog `guides[]`, form tags, and the seed file all key off the same strings.
-  Changing a tag means changing five things. **Do not invent one ad hoc**; raise it and
-  let the taxonomy be updated once. Settled in S3 ([write-up](S3-failure-taxonomy.md)):
+- **Failure taxonomy issues are the linchpin** — the LLM prompt, catalog `repair_costs[]`,
+  catalog `guides[]`, form issues, and the seed file all key off the same strings.
+  Changing an issue means changing five things. **Do not invent one ad hoc**; raise a
+  GitHub issue and let the taxonomy be updated once. Settled in S3 ([write-up](S3-failure-taxonomy.md)):
 
-  | Scope | Tags |
+  | Scope | Issues |
   |---|---|
   | All device types | `screen` · `battery` · `wont-power-on` · `water-damage` · `charging-port` · `speaker` |
   | Phone / tablet | `camera` |
   | Laptop and 2-in-1 | `keyboard-trackpad` · `hinge-kickstand` · `overheating` |
 
-  A tag only qualifies if a non-technical owner could say it without opening the device
+  An issue only qualifies if a non-technical owner could say it without opening the device
   or knowing a part name. One shared vocabulary across device types — `battery` means
   the same thing on a phone and a laptop; only the price behind it differs.
 - **The session LLM never joins the lookup key.** It returns `device_id`, `condition`
   (`working` | `broken`) and `variant` as three separate values; the service composes
-  them (C1 #88, M3 #56, M12 #65). Its schema must reject an invented failure tag.
+  them (C1 #88, M3 #56, M12 #65). Its schema must reject an invented failure issue.
 - Two phrasings of the same device/condition/variant **must** normalize to the same
   key — that is what makes the cache work and it is an acceptance criterion.
 - Every price entry carries `as_of` and at least one source URL. No exceptions — a
@@ -415,9 +417,9 @@ and Validation contains at least one *checked* command checkbox: ``- [x] `comman
 Use [.github/PULL_REQUEST_TEMPLATE.md](.github/PULL_REQUEST_TEMPLATE.md) and actually
 check the box for the command you ran.
 
-This is an **open-source project built around claimed issues**, not assigned tracks.
-Tasks should be self-contained enough for a contributor to pick up cold, with
-acceptance criteria in the issue itself.
+This is an **open-source project built around claimed GitHub issues**, not assigned
+tracks. Tasks should be self-contained enough for a contributor to pick up cold, with
+acceptance criteria in the GitHub issue itself.
 
 ## Environment
 

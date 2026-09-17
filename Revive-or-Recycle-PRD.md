@@ -37,7 +37,7 @@ Two principles govern every data decision in this document:
 
 **Primary user:** An average adult with low technical ability who owns a device that is broken, degraded, or no longer in use. They are not a technician and cannot perform a hardware diagnosis on their own. They want a fast, plain-language answer to "is this worth fixing?"
 
-The product makes no assumption of technical literacy. The diagnostic flow is built around guided self-report (forms, tags, and multiple-choice clarifications), not around the user knowing component-level failure modes.
+The product makes no assumption of technical literacy. The diagnostic flow is built around guided self-report (forms, issues, and multiple-choice clarifications), not around the user knowing component-level failure modes.
 
 ---
 
@@ -47,7 +47,7 @@ The product makes no assumption of technical literacy. The diagnostic flow is bu
 
 - Device selection across a catalog of 20 supported devices.
 - A standard + variable symptom self-diagnosis form.
-- Stateless LLM classification of the user's described issue into tagged failure probabilities, with a single-turn clarification loop for ambiguous input.
+- Stateless LLM classification of the user's described issue into per-issue failure probabilities, with a single-turn clarification loop for ambiguous input.
 - An **in-app repair-guide exploration step** (§7.5) — a guide list matched to the classified symptoms, an embedded guide reader, and a "did this help?" checkpoint that lets a user who successfully fixed the device exit the flow. Nothing in this step links off-platform.
 - A transparent triage result dashboard (**broken-vs-repaired value comparison**, working value, used-market range, per-issue repair cost range and probability, weighted repair cost range, net gain from repair, verdict, and dated source evidence links).
 - Three-way decision routing: **Revive**, **Recycle**, and **Sell broken (as-is)**.
@@ -114,7 +114,7 @@ The two data sources are split by cadence and by shape:
                      ├─ L3 sanity band ±40%             │              │
                      │     in-band  ─▶ accept           │              ▼
                      │     out-of-band ─▶ keep old,     │    Market data service ──▶ Firestore
-                     │                   open issue     │    (holds sc_ key)      market_comps
+                     │                   GitHub issue   │    (holds sc_ key)      market_comps
                      └─ iFixit guide harvest            │              │               │
                               │                         │              │      HIT (< 30 days) ─▶ return
                               ▼                         │              │               │
@@ -190,7 +190,7 @@ Before any extracted value is written into the catalog, it is checked against th
 
 This is a tripwire, not a review process. It exists because the realistic failure mode of page extraction is grabbing the wrong number off the right page — a protection-plan price, the device's retail price, a promotional "$0" line. Without the band, one bad extraction silently corrupts a repair estimate and flips the verdict for that device.
 
-Critically, **nobody has to be watching.** If no one ever reads the issue, the previous value simply remains in place and the tool keeps working. Human attention improves the data; its absence does not break the tool.
+Critically, **nobody has to be watching.** If no one ever reads the GitHub issue, the previous value simply remains in place and the tool keeps working. Human attention improves the data; its absence does not break the tool.
 
 The band width lives in the catalog as `refresh_rule.sanity_band_pct` so it can be retuned by redeploying the catalog rather than the pipeline.
 
@@ -198,7 +198,7 @@ An entry that has no current value at all — a newly added device or failure ca
 
 ### 6A.5 iFixit guide harvest
 
-The same monthly run queries iFixit for the repair guides and repairability metadata that the Explore step (§7.5) renders in-app: guide titles, guide URLs, difficulty, time estimates, and the step content needed to display a guide without sending the user off-platform. Guides are keyed to the same failure-category tags as repair costs, so a classified symptom maps directly to the guides worth showing.
+The same monthly run queries iFixit for the repair guides and repairability metadata that the Explore step (§7.5) renders in-app: guide titles, guide URLs, difficulty, time estimates, and the step content needed to display a guide without sending the user off-platform. Guides are keyed to the same failure-category issues as repair costs, so a classified symptom maps directly to the guides worth showing.
 
 iFixit supplies **guides**, not prices. It publishes repair instructions and parts, not labor-inclusive flat rates, which is why repair costs come from §6A.2–6A.4 instead.
 
@@ -336,7 +336,7 @@ The user fills out a **standard + variable** form describing their device's cond
 
 - **Standard fields (every device):**
   - User zip code (used later for location lookups).
-  - Issue-with-device field / tags — a free-text and/or tag description of the symptom(s).
+  - Issue-with-device field — a free-text and/or issue-selection description of the symptom(s).
   - Water damage — yes / no.
 - **Variable fields (device-specific):**
   - Device spec specifics (e.g. storage configuration), driven by the catalog's `variable_fields`.
@@ -348,7 +348,7 @@ The field named by the device's `variant_key_field` feeds the market cache key, 
 
 On form submit, the user's input is sent via a **single, stateless API request** to DeepSeek V4 Flash. The LLM acts strictly as a **classification and normalization parser**: it returns a deterministic JSON block. It combines the stored device information (from the catalog) with the user's form response to produce:
 
-1. **Failure classification** — the probabilities of specific hardware failures, tagged against the catalog's failure categories.
+1. **Failure classification** — the probabilities of specific hardware failures, matched against the catalog's failure categories.
 2. **A market lookup key** — the user's device selection, condition, and variant normalized into the three components the market data service needs: `device_id`, `condition` (`working` / `broken`), and `variant` (e.g. `128gb`).
 3. **A confidence score** for the classification.
 
@@ -492,7 +492,7 @@ The user always retains the choice — the tool recommends, it does not decide �
 | Background (monthly) | Fetch published repair-pricing page text for extraction | Direct HTTP fetch from the pipeline |
 | Background (monthly) | Extract repair-price ranges from that fetched text | DeepSeek V4 Flash (no internet access; reads supplied text only) |
 | Background (monthly) | Fetch repair guides, step content, and repairability metadata | iFixit API / data |
-| Live (user session) | Classify the described issue into tagged failure probabilities **and** normalize it into a `device_id` / `condition` / `variant` market lookup key | DeepSeek V4 Flash |
+| Live (user session) | Classify the described issue into per-issue failure probabilities **and** normalize it into a `device_id` / `condition` / `variant` market lookup key | DeepSeek V4 Flash |
 | Live (user session) | Resolve that key to market values — Firestore read on a fresh hit; SoldComps fetch + write-back on a miss or an entry ≥ 30 days old | Market data service (server-side Cloud Function; holds the SoldComps key) |
 | Live (**cache miss only**) | Fetch working and broken/as-is sold prices for a device/condition/variant not already in the store | **SoldComps API** — `GET https://api.sold-comps.com/v1/scrape` (eBay sold/completed listings, bearer-key auth, ≤ 240 results per request, 90-day history, one page per figure) |
 | Live (user session) | Locate authorized e-waste recycling, trade-in, and drop-off centers | Google Places API |
@@ -593,7 +593,7 @@ Field notes:
 - `basis` is `seed` or `extracted` — where this specific value came from. It drives nothing in the UI directly, but makes a stalled pipeline diagnosable from the payload alone.
 - `as_of` is the date this value was established, and it is displayed to the user (§7.7). A `seed` entry with an old `as_of` is a source that has not been successfully refreshed.
 - `sources` is a list, because a range can span several providers. Every entry must carry at least one.
-- `guides` is keyed by the same `issue` tags as `repair_costs`, so a classified symptom maps to both a cost and a set of guides.
+- `guides` is keyed by the same `issue` ids as `repair_costs`, so a classified symptom maps to both a cost and a set of guides.
 - `variant_key_field` names which variable field participates in the market cache key, so the LLM and the service agree on what `variant` means for a given device.
 - `verdict_rule` holds the ratio boundaries from §8.3 and `refresh_rule.sanity_band_pct` the Layer 3 band width (§6A.4), so both can be retuned by redeploying the catalog rather than the code or the pipeline.
 
@@ -670,7 +670,7 @@ Constraints on this document:
 **Frontend & flow**
 
 - The app loads the catalog from the CDN and lets a user find their device via predictive search/dropdown or device chips.
-- The symptom form renders the correct variable fields for the selected device and collects zip code, issue tags, water damage, and the variant field named by `variant_key_field`.
+- The symptom form renders the correct variable fields for the selected device and collects zip code, issues, water damage, and the variant field named by `variant_key_field`.
 - The four-stage indicator (**1 Describe · 2 Explore · 3 Estimate · 4 Decide**) reflects the user's position throughout, and is absent on the Analyzing screen.
 - No user data is persisted; closing the tab discards all session state. No accounts, no tracking cookies.
 
