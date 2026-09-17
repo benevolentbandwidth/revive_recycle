@@ -44,9 +44,10 @@ Researched Aug 20, 2026.
   same thing on a phone and a laptop. Only the price behind it differs.
 
 **Don't invent new issues.** These strings are used in five places: the AI classification
-prompt, the repair prices in the Device Catalog, the repair guides in the Device Catalog, 
-the issue buttons on the symptom form, and the hand-written seed file. A new issue means updating
-all five, so nobody adds one ad hoc, raise it so the taxonomy gets updated once.
+prompt, the repair prices in the Device Catalog, the repair guides in the Device Catalog,
+the issue buttons on the symptom form, and the hand-written seed file. A new issue means
+updating all five, so nobody adds one ad hoc — raise a GitHub issue so the taxonomy gets
+updated once.
 
 ## Reasoning
 

@@ -114,7 +114,7 @@ The two data sources are split by cadence and by shape:
                      ├─ L3 sanity band ±40%             │              │
                      │     in-band  ─▶ accept           │              ▼
                      │     out-of-band ─▶ keep old,     │    Market data service ──▶ Firestore
-                     │                   open issue     │    (holds sc_ key)      market_comps
+                     │                   GitHub issue   │    (holds sc_ key)      market_comps
                      └─ iFixit guide harvest            │              │               │
                               │                         │              │      HIT (< 30 days) ─▶ return
                               ▼                         │              │               │
@@ -190,7 +190,7 @@ Before any extracted value is written into the catalog, it is checked against th
 
 This is a tripwire, not a review process. It exists because the realistic failure mode of page extraction is grabbing the wrong number off the right page — a protection-plan price, the device's retail price, a promotional "$0" line. Without the band, one bad extraction silently corrupts a repair estimate and flips the verdict for that device.
 
-Critically, **nobody has to be watching.** If no one ever reads the issue, the previous value simply remains in place and the tool keeps working. Human attention improves the data; its absence does not break the tool.
+Critically, **nobody has to be watching.** If no one ever reads the GitHub issue, the previous value simply remains in place and the tool keeps working. Human attention improves the data; its absence does not break the tool.
 
 The band width lives in the catalog as `refresh_rule.sanity_band_pct` so it can be retuned by redeploying the catalog rather than the pipeline.
 
