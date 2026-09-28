@@ -4,8 +4,12 @@
     "iphone-14": [
       {
         "issue": "screen",
-        "label": "Cracked or failed screen",
-        "flat_rate": { "low": 79, "high": 349, "currency": "USD" },
+        "label": "Screen is cracked, black, or glitching",
+        "flat_rate": {
+          "low": 79,
+          "high": 349,
+          "currency": "USD"
+        },
         "as_of": "2026-09-23",
         "sources": [
           "https://support.apple.com/iphone/repair/screen-replacement",
@@ -16,8 +20,12 @@
       },
       {
         "issue": "battery",
-        "label": "Worn-out battery",
-        "flat_rate": { "low": 59, "high": 129, "currency": "USD" },
+        "label": "Battery drains fast, won't hold a charge, or is swollen",
+        "flat_rate": {
+          "low": 59,
+          "high": 129,
+          "currency": "USD"
+        },
         "as_of": "2026-09-23",
         "sources": [
           "https://support.apple.com/iphone/repair/battery-replacement",
@@ -28,8 +36,12 @@
       },
       {
         "issue": "charging-port",
-        "label": "Charging port failure",
-        "flat_rate": { "low": 59, "high": 609, "currency": "USD" },
+        "label": "Won't charge, or only charges sometimes",
+        "flat_rate": {
+          "low": 59,
+          "high": 609,
+          "currency": "USD"
+        },
         "as_of": "2026-09-23",
         "sources": [
           "https://www.houstoniphonerepair.com/iphone_repair/iphone_14_repair.html",
@@ -39,8 +51,12 @@
       },
       {
         "issue": "speaker",
-        "label": "Speaker failure",
-        "flat_rate": { "low": 59, "high": 609, "currency": "USD" },
+        "label": "Can't hear anything, or sound is muffled/crackling",
+        "flat_rate": {
+          "low": 59,
+          "high": 609,
+          "currency": "USD"
+        },
         "as_of": "2026-09-23",
         "sources": [
           "https://www.ifixforu.com/en/blog/iphone-speaker-repair-cost",
@@ -49,8 +65,12 @@
       },
       {
         "issue": "camera",
-        "label": "Rear camera damage",
-        "flat_rate": { "low": 169, "high": 169, "currency": "USD" },
+        "label": "Camera is blurry, won't focus, or won't open",
+        "flat_rate": {
+          "low": 169,
+          "high": 169,
+          "currency": "USD"
+        },
         "as_of": "2026-09-23",
         "sources": [
           "https://support.apple.com/iphone/repair/screen-replacement",
@@ -59,24 +79,40 @@
       },
       {
         "issue": "water-damage",
-        "label": "Liquid damage",
-        "flat_rate": { "low": 609, "high": 609, "currency": "USD" },
+        "label": "Got wet, spilled on, or otherwise liquid-damaged",
+        "flat_rate": {
+          "low": 609,
+          "high": 609,
+          "currency": "USD"
+        },
         "as_of": "2026-09-23",
-        "sources": ["https://support.apple.com/iphone/repair/screen-replacement"]
+        "sources": [
+          "https://support.apple.com/iphone/repair/screen-replacement"
+        ]
       },
       {
         "issue": "wont-power-on",
-        "label": "Won't power on",
-        "flat_rate": { "low": 609, "high": 609, "currency": "USD" },
+        "label": "Won't turn on at all",
+        "flat_rate": {
+          "low": 609,
+          "high": 609,
+          "currency": "USD"
+        },
         "as_of": "2026-09-23",
-        "sources": ["https://support.apple.com/iphone/repair/screen-replacement"]
+        "sources": [
+          "https://support.apple.com/iphone/repair/screen-replacement"
+        ]
       }
     ],
     "macbook-air-m2": [
       {
         "issue": "screen",
-        "label": "Cracked or failed screen",
-        "flat_rate": { "low": 249, "high": 499, "currency": "USD" },
+        "label": "Screen is cracked, black, or glitching",
+        "flat_rate": {
+          "low": 249,
+          "high": 499,
+          "currency": "USD"
+        },
         "as_of": "2026-09-23",
         "sources": [
           "https://warriormac.com/services/macbook-air-repair",
@@ -85,8 +121,12 @@
       },
       {
         "issue": "battery",
-        "label": "Worn-out battery",
-        "flat_rate": { "low": 129, "high": 199, "currency": "USD" },
+        "label": "Battery drains fast, won't hold a charge, or is swollen",
+        "flat_rate": {
+          "low": 129,
+          "high": 199,
+          "currency": "USD"
+        },
         "as_of": "2026-09-23",
         "sources": [
           "https://support.apple.com/mac-laptops/repair",
@@ -95,24 +135,40 @@
       },
       {
         "issue": "keyboard-trackpad",
-        "label": "Keyboard or trackpad failure",
-        "flat_rate": { "low": 179, "high": 299, "currency": "USD" },
+        "label": "Keys don't respond, or the trackpad doesn't click or scroll correctly",
+        "flat_rate": {
+          "low": 179,
+          "high": 299,
+          "currency": "USD"
+        },
         "as_of": "2026-09-23",
-        "sources": ["https://warriormac.com/services/macbook-air-repair"]
+        "sources": [
+          "https://warriormac.com/services/macbook-air-repair"
+        ]
       },
       {
         "issue": "water-damage",
-        "label": "Liquid damage",
-        "flat_rate": { "low": 149, "high": 499, "currency": "USD" },
+        "label": "Got wet, spilled on, or otherwise liquid-damaged",
+        "flat_rate": {
+          "low": 149,
+          "high": 499,
+          "currency": "USD"
+        },
         "as_of": "2026-09-23",
-        "sources": ["https://warriormac.com/services/macbook-air-repair"]
+        "sources": [
+          "https://warriormac.com/services/macbook-air-repair"
+        ]
       }
     ],
     "surface-pro-9": [
       {
         "issue": "screen",
-        "label": "Cracked or failed screen",
-        "flat_rate": { "low": 489, "high": 640, "currency": "USD" },
+        "label": "Screen is cracked, black, or glitching",
+        "flat_rate": {
+          "low": 489,
+          "high": 640,
+          "currency": "USD"
+        },
         "as_of": "2026-09-23",
         "sources": [
           "https://support.microsoft.com/en-us/surface/hardware-warranty/how-much-does-out-of-warranty-service-cost-for-your-device-or-accessory-united-states",
@@ -121,8 +177,12 @@
       },
       {
         "issue": "battery",
-        "label": "Worn-out battery",
-        "flat_rate": { "low": 299, "high": 400, "currency": "USD" },
+        "label": "Battery drains fast, won't hold a charge, or is swollen",
+        "flat_rate": {
+          "low": 299,
+          "high": 400,
+          "currency": "USD"
+        },
         "as_of": "2026-09-23",
         "sources": [
           "https://support.microsoft.com/en-us/surface/hardware-warranty/how-much-does-out-of-warranty-service-cost-for-your-device-or-accessory-united-states",
@@ -131,31 +191,55 @@
       },
       {
         "issue": "water-damage",
-        "label": "Liquid damage",
-        "flat_rate": { "low": 850, "high": 850, "currency": "USD" },
+        "label": "Got wet, spilled on, or otherwise liquid-damaged",
+        "flat_rate": {
+          "low": 850,
+          "high": 850,
+          "currency": "USD"
+        },
         "as_of": "2026-09-23",
-        "sources": ["https://support.microsoft.com/en-us/surface/hardware-warranty/how-much-does-out-of-warranty-service-cost-for-your-device-or-accessory-united-states"]
+        "sources": [
+          "https://support.microsoft.com/en-us/surface/hardware-warranty/how-much-does-out-of-warranty-service-cost-for-your-device-or-accessory-united-states"
+        ]
       },
       {
         "issue": "wont-power-on",
-        "label": "Won't power on",
-        "flat_rate": { "low": 600, "high": 600, "currency": "USD" },
+        "label": "Won't turn on at all",
+        "flat_rate": {
+          "low": 600,
+          "high": 600,
+          "currency": "USD"
+        },
         "as_of": "2026-09-23",
-        "sources": ["https://support.microsoft.com/en-us/surface/hardware-warranty/how-much-does-out-of-warranty-service-cost-for-your-device-or-accessory-united-states"]
+        "sources": [
+          "https://support.microsoft.com/en-us/surface/hardware-warranty/how-much-does-out-of-warranty-service-cost-for-your-device-or-accessory-united-states"
+        ]
       },
       {
         "issue": "charging-port",
-        "label": "Charging port failure",
-        "flat_rate": { "low": 600, "high": 600, "currency": "USD" },
+        "label": "Won't charge, or only charges sometimes",
+        "flat_rate": {
+          "low": 600,
+          "high": 600,
+          "currency": "USD"
+        },
         "as_of": "2026-09-23",
-        "sources": ["https://support.microsoft.com/en-us/surface/hardware-warranty/how-much-does-out-of-warranty-service-cost-for-your-device-or-accessory-united-states"]
+        "sources": [
+          "https://support.microsoft.com/en-us/surface/hardware-warranty/how-much-does-out-of-warranty-service-cost-for-your-device-or-accessory-united-states"
+        ]
       },
       {
         "issue": "speaker",
-        "label": "Speaker failure",
-        "flat_rate": { "low": 600, "high": 600, "currency": "USD" },
+        "label": "Can't hear anything, or sound is muffled/crackling",
+        "flat_rate": {
+          "low": 600,
+          "high": 600,
+          "currency": "USD"
+        },
         "as_of": "2026-09-23",
-        "sources": ["https://support.microsoft.com/en-us/surface/hardware-warranty/how-much-does-out-of-warranty-service-cost-for-your-device-or-accessory-united-states"]
+        "sources": [
+          "https://support.microsoft.com/en-us/surface/hardware-warranty/how-much-does-out-of-warranty-service-cost-for-your-device-or-accessory-united-states"
+        ]
       }
     ]
   }
