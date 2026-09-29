@@ -70,7 +70,7 @@ $1,200 for a repair Microsoft performs once for $600. That's not a hypothetical;
 the formula does today against this seed file.
 
 This was raised on S4 review as a Surface quirk needing a `bundled_with` field. It is not a
-Surface quirk — it affects **7 of the 17 priced entries across two devices and two
+Surface quirk - it affects **7 of the 17 priced entries across two devices and two
 manufacturers**, and it is how flat-rate repair pricing normally works. The field is needed.
 
 Concretely, the two bundles to express are:
@@ -89,7 +89,7 @@ repair-price spread.
 Suggested rule for S6: when two or more classified issues resolve to the same bundle, the
 bundle contributes its flat rate **once**, weighted by the probability that any of its member
 issues is present. The 5G Surface Pro 9 needs the same fix under its own single flat repair
-price once it's seeded — see case 12 and item 8 below.
+price once it's seeded — see case 12 and item 10 below.
 
 ### 2. S4's "unpriced catch-all" is wrong for iPhone
 
@@ -107,7 +107,7 @@ date the price took effect.
 
 Invariant 5 renders this to users as "repair prices as of ‹date›". That phrasing currently
 promises more than the data supports. Either the copy softens, or we accept that `as_of` means
-observation date and document it- S6 should decide deliberately rather than inherit it.
+observation date and document it — S6 should decide deliberately rather than inherit it.
 
 ### 4. Microsoft's Surface prices moved 16–31% in about a month
 
@@ -130,7 +130,7 @@ month-over-month data point to check it against.
 ### 5. The range is set by part grade, not by shop margin
 
 The PRD's worked example is "Apple $279, local shop $199", a modest spread from margin. The
-real spread on an iPhone 14 screen is **$79 to $349**, about 4.4x, and margin has little to do
+real spread on an iPhone 14 screen is **$79 to $349**, about 4.4x and margin has little to do
 with it:
 
 | Price | What you get |
@@ -201,6 +201,10 @@ iPhone 14 rear camera is $169 at Apple and $169 at One Hour Device Repair. That 
 strong corroboration and is almost certainly the independent matching Apple's published
 number. The entry has `low` equal to `high` and two source URLs, which overstates what is
 known. Any "confidence" signal derived later from source count would be misled here.
+
+One more gap in this same entry: S3's `camera` label ("Camera is blurry, won't focus, or
+won't open") covers both front and rear camera, but $169 is specifically Apple's rear-camera
+price — a front-camera repair isn't covered by this figure at all.
 
 ### 11. Two Surface issues have no repairable line at all
 
@@ -299,19 +303,24 @@ Rossmann's $600 (case 14) and Salvation Repair's claim that Apple charges $479 f
 
 ## What S6 needs to decide
 
-1. Add `bundled_with` (case 1) — 7 entries currently over-count.
-2. Whether `as_of` means observation date, and whether the UI copy matches (case 3).
+1. Add `bundled_with` (case 1) - 7 entries currently over-count. **Resolved:** inside S6,
+   not a separate issue as the catalog schema isn't frozen yet.
+2. Whether `as = of` means observation date, and whether the UI copy matches (case 3).
 3. A part-grade policy for `flat_rate` (case 5), which feeds directly into 4.
-4. Whether the verdict thresholds survive honest ranges (case 6) — test with real market data.
-5. What to do with single-source entries where `low` equals `high` — seven of them (iPhone
+4. Whether the verdict thresholds survive honest ranges (case 6) - test with real market data.
+5. What to do with single-source entries where `low` equals `high` - seven of them (iPhone
    camera, water-damage and wont-power-on, plus four Surface entries). Invariant 6 says
    ranges, never point estimates, and case 10 only covers the camera case in detail.
-6. Whether `keyboard-trackpad` should map to Surface at all (case 11).
+6. Whether `keyboard-trackpad` should map to Surface at all (case 11). **Resolved:** not in
+   S6's — S3 is closed, so this needs its own issue against S3's device mapping,
+   linked from S6 rather than answered inside it.
 7. Whether `wont-power-on` is a cost issue or a routing issue (case 13).
 8. An extraction-prompt exclusion list for Layer 2: data recovery, diagnostics, deposits,
    accessories, labor-only-plus-part (cases 8 and 14).
 9. Whether the catalog needs its own way to carry a caveat like bundled or tier-priced, or
    whether that information permanently lives only in write-ups like this one (case 15).
-10. The 5G Surface Pro 9 isn't in this seed file — Surface Pro 9 is seeded from the Intel
-    prices only (see Answer, above) — so whoever adds 5G later needs to confirm it gets its
-    own figures rather than silently inheriting Intel's (case 12).
+10. The 5G Surface Pro 9 isn't in this seed file - Surface Pro 9 is seeded from the Intel
+    prices only (see Answer, above). `repair_costs[]` has no field for a variant, so there's
+    nowhere to put 5G-specific prices even once they're researched. Does the entry shape
+    need a variant axis, or does 5G need its own `device_id`, or its own seed section?
+    Genuinely open - S6's to answer (case 12).
