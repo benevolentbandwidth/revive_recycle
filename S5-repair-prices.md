@@ -130,7 +130,7 @@ month-over-month data point to check it against.
 ### 5. The range is set by part grade, not by shop margin
 
 The PRD's worked example is "Apple $279, local shop $199", a modest spread from margin. The
-real spread on an iPhone 14 screen is **$79 to $349**, about 4.4x and margin has little to do
+real spread on an iPhone 14 screen is **$79 to $349**, about 4.4x, and margin has little to do
 with it:
 
 | Price | What you get |
@@ -305,14 +305,14 @@ Rossmann's $600 (case 14) and Salvation Repair's claim that Apple charges $479 f
 
 1. Add `bundled_with` (case 1) - 7 entries currently over-count. **Resolved:** inside S6,
    not a separate issue as the catalog schema isn't frozen yet.
-2. Whether `as = of` means observation date, and whether the UI copy matches (case 3).
+2. Whether `as_of` means observation date, and whether the UI copy matches (case 3).
 3. A part-grade policy for `flat_rate` (case 5), which feeds directly into 4.
 4. Whether the verdict thresholds survive honest ranges (case 6) - test with real market data.
 5. What to do with single-source entries where `low` equals `high` - seven of them (iPhone
    camera, water-damage and wont-power-on, plus four Surface entries). Invariant 6 says
    ranges, never point estimates, and case 10 only covers the camera case in detail.
-6. Whether `keyboard-trackpad` should map to Surface at all (case 11). **Resolved:** not in
-   S6's — S3 is closed, so this needs its own issue against S3's device mapping,
+6. Whether `keyboard-trackpad` should map to Surface at all (case 11). **Resolved:** not
+   S6's to decide — S3 is closed, so this needs its own issue against S3's device mapping,
    linked from S6 rather than answered inside it.
 7. Whether `wont-power-on` is a cost issue or a routing issue (case 13).
 8. An extraction-prompt exclusion list for Layer 2: data recovery, diagnostics, deposits,
