@@ -3,7 +3,7 @@ name = "revive-catalog-pipeline"
 version = "0.1.0"
 description = "Python pipeline scaffold and S4 pricing-page registry"
 requires-python = ">=3.11,<3.12"
-dependencies = []
+dependencies = ["httpx==0.28.1", "beautifulsoup4==4.13.5"]
 
 [dependency-groups]
 dev = ["pytest==8.4.2", "ruff==0.13.0"]
