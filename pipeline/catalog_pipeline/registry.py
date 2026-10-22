@@ -2,6 +2,7 @@
 
 import json
 import logging
+import re
 from dataclasses import dataclass
 from pathlib import Path
 from urllib.parse import urlsplit
@@ -15,9 +16,19 @@ def validate_url(url: str) -> str:
     if not isinstance(url, str):
         raise ValueError("URL must be text")
     parsed = urlsplit(url)
-    if parsed.scheme not in {"http", "https"} or not parsed.hostname or parsed.username:
+    if (
+        parsed.scheme not in {"http", "https"}
+        or not parsed.hostname
+        or parsed.username is not None
+        or parsed.password is not None
+    ):
         raise ValueError("Expected an absolute HTTP(S) URL without credentials")
     return url
+
+
+def _url_key(url: str) -> tuple:
+    parsed = urlsplit(validate_url(url))
+    return (parsed.scheme, parsed.hostname, parsed.port, parsed.path.rstrip("/"), parsed.query)
 
 
 @dataclass(frozen=True)
@@ -80,11 +91,28 @@ class Registry:
         excluded = raw.get("excluded_by_robots", [])
         if not isinstance(excluded, list) or any(not isinstance(x, str) for x in excluded):
             raise ValueError("excluded_by_robots must contain absolute URL strings")
-        excluded = {validate_url(url) for url in excluded}
+        excluded = {_url_key(url) for url in excluded}
         blocked_domains = set()
-        for rule in raw.get("robots_txt", []):
-            if not _flag(rule, "allowed", True):
-                blocked_domains.add(rule["domain"].lower())
+        rules = raw.get("robots_txt", [])
+        if not isinstance(rules, list):
+            raise ValueError("robots_txt must be a list")
+        for rule in rules:
+            if not isinstance(rule, dict) or "allowed" not in rule or "allow" in rule:
+                raise ValueError("Each robots rule requires an explicit allowed boolean")
+            allowed = _flag(rule, "allowed")
+            domain = rule.get("domain")
+            if (
+                not isinstance(domain, str)
+                or not domain
+                or len(domain) > 253
+                or any(
+                    not re.fullmatch(r"[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?", label)
+                    for label in domain.split(".")
+                )
+            ):
+                raise ValueError("Robots domain must be an exact hostname")
+            if not allowed:
+                blocked_domains.add(domain.lower())
         pairs = {}
         devices = set()
         for device in raw["devices"]:
@@ -110,13 +138,15 @@ class Registry:
                     if source["source_type"] not in {"manufacturer", "chains", "parts"}:
                         raise ValueError("Unknown source_type")
                     for field in ("publisher", "note"):
-                        if not isinstance(source.get(field, ""), str):
+                        value = source[field] if field == "publisher" else source.get(field, "")
+                        if not isinstance(value, str):
                             raise ValueError(f"{field} must be text")
                     browser = _flag(source, "requires_browser_ua")
                     disabled = _flag(source, "disabled") | _flag(source, "excluded")
                     domain = urlsplit(url).hostname
-                    blocked = any(domain == d or domain.endswith("." + d) for d in blocked_domains)
-                    if not disabled and url not in excluded and not blocked:
+                    blocked = domain in blocked_domains
+                    url_key = _url_key(url)
+                    if not disabled and url_key not in excluded and not blocked:
                         sources.append(
                             Source(
                                 url,

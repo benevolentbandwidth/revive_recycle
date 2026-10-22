@@ -6,10 +6,11 @@ requires-python = ">=3.11,<3.12"
 dependencies = []
 
 [dependency-groups]
-dev = ["pytest==8.4.2", "ruff==0.13.0"]
+dev = ["pytest==8.4.2", "pytest-socket==0.7.0", "ruff==0.13.0"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+addopts = "--disable-socket --allow-unix-socket"
 pythonpath = ["."]
 
 [tool.ruff]

@@ -1,10 +1,10 @@
 name: Pipeline CI
 on:
   pull_request:
-    paths: ['pipeline/**', '.github/workflows/pipeline-ci.yml', 'S4-repair-price-pages.json']
+    paths: ['pipeline/**', '.github/workflows/pipeline-ci.yml', 'S4-repair-price-pages.json', 'S3-failure-taxonomy.md']
   push:
     branches: [main]
-    paths: ['pipeline/**', '.github/workflows/pipeline-ci.yml', 'S4-repair-price-pages.json']
+    paths: ['pipeline/**', '.github/workflows/pipeline-ci.yml', 'S4-repair-price-pages.json', 'S3-failure-taxonomy.md']
 permissions:
   contents: read
 jobs:

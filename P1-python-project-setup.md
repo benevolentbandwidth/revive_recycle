@@ -20,7 +20,7 @@ and pytest for tests.
 
 `requires-python` is `>=3.11,<3.12`. There are no third-party runtime dependencies.
 The development group pins
-`pytest==8.4.2` and `ruff==0.13.0`. The lockfile pins transitive dependencies too.
+`pytest==8.4.2`, `pytest-socket==0.7.0`, and `ruff==0.13.0`. The lockfile pins transitive dependencies too.
 The documented bootstrap and CI use `uv==0.8.22`.
 
 **Local commands**, from `pipeline/` with Python 3.11 available:
@@ -40,7 +40,7 @@ Pytest discovers `tests/` and adds the project directory to its import path.
 
 **CI:** [Pipeline CI](.github/workflows/pipeline-ci.yml) runs on pull requests and
 pushes to `main` affecting `pipeline/**`, the workflow itself, or
-`S4-repair-price-pages.json`. It uses Ubuntu and Python 3.11, installs uv, syncs
+`S4-repair-price-pages.json` or `S3-failure-taxonomy.md`. It uses Ubuntu and Python 3.11, installs uv, syncs
 locked dependencies, and runs lint, formatting checks, and pytest. Repository
 content permissions are read-only. Requiring this check for merges is a branch
 protection setting; the workflow alone does not enforce that setting.
@@ -53,8 +53,9 @@ no legacy dependency bundle is installed. Pipeline code does **not import from
 `legacy/`**.
 
 **Keep tests offline.** Registry tests use the committed S4 JSON and small fixtures.
-[`conftest.py`](pipeline/tests/conftest.py) blocks socket `connect` and `connect_ex`,
-preventing accidental network calls during tests.
+pytest-socket disables Internet sockets; Unix sockets remain available for local
+event loops. [`conftest.py`](pipeline/tests/conftest.py) also blocks DNS lookups.
+Tests must mock HTTP and API clients.
 
 This scaffold does not establish a Device Catalog schema. Seed loading, catalog
 writing, scheduling, and deployment are outside P1. Development commands are also

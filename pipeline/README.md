@@ -1,4 +1,4 @@
-﻿# Catalog Pipeline
+# Catalog Pipeline
 
 Python 3.11 project scaffold and S4 pricing-page registry. The project is separate
 from `web/` and imports nothing from `legacy/`. Runtime code uses only the standard
@@ -16,10 +16,11 @@ uv run --locked ruff format --check .
 uv run --locked pytest
 ```
 
-Use `uv run --locked ruff format .` to apply formatting. Direct dependencies are
-pinned in `pyproject.toml`; transitive versions and hashes are in `uv.lock`.
+Use `uv run --locked ruff format .` to apply formatting. Development dependencies are pinned in `pyproject.toml`.
+The lockfile records transitive versions and hashes.
 Modules run directly from this directory. Smoke and registry tests run offline;
-the shared test fixture blocks socket connections.
+pytest-socket blocks network sockets and the shared fixture blocks DNS.
+Local Unix sockets are allowed for event loops; Internet sockets remain blocked.
 
 ## Registry usage
 

@@ -46,9 +46,10 @@ application configures logging. The property exposes the list independently of l
 ## Reasoning
 
 **Validate the registry, not an unfinished catalog schema.**
-[`taxonomy.py`](pipeline/catalog_pipeline/taxonomy.py) transcribes S2 identities and
-S3 device/issue mappings. Validation rejects unknown or duplicate devices, duplicate
-pairs, invalid required structure, non-HTTP(S) or hostless URLs, URLs with usernames,
+[`taxonomy.py`](pipeline/catalog_pipeline/taxonomy.py) loads the explicit pilot device/issue mapping from the
+canonical S3 Markdown section. Missing or malformed mappings fail validation;
+there is no second hard-coded taxonomy or dependency on S6. Validation rejects unknown or duplicate devices, duplicate
+pairs, invalid required structure, non-HTTP(S) or hostless URLs, URLs with any credentials,
 unknown source types, non-text publisher/notes, and non-boolean flags. Source types
 are `manufacturer`, `chains`, and `parts`. Per-repair `nothing_found: true` cannot
 accompany sources; top-level `nothing_found` entries must name valid pairs without
@@ -58,10 +59,15 @@ visible. This is purpose-built validation, not a schema for every research metad
 **Exclusions are explicit:**
 
 - Source-level `disabled: true` or `excluded: true` removes a source from lookup.
-- `robots_txt[].allowed: false` excludes the named domain and its subdomains.
-- `excluded_by_robots` accepts absolute URL strings and excludes exact URL matches.
+- `robots_txt[].allowed: false` excludes only the exact hostname. Each rule requires
+  a hostname and an explicit boolean `allowed`; malformed rules are rejected.
+- `excluded_by_robots` accepts absolute URL strings and compares URLs after normalizing host case,
+  trailing slashes, and fragments, preserving path case and query parameters.
   S4's list is currently empty, so it defines no nonempty entry shape. The reader
   rejects other shapes instead of silently ignoring them.
+
+All sources, including disabled and excluded entries, are validated before filtering.
+Required URL, source type, and publisher fields cannot be omitted.
 
 The optional source switches do not modify the committed S4 data.
 `requires_browser_ua` is retained as metadata, not permission to impersonate a

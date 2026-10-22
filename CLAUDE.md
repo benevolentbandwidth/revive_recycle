@@ -308,7 +308,8 @@ them do not, which is what lets them run in parallel.
 
 **Anything numbered `0.x` or `1.x` is dead.** GitHub issues #21–#29 were closed **as
 not planned** on 2026-08-13 — superseded by the renumbering, *not* completed.
-**S2 (#31)** and **S3 (#32)** are complete; **S5 (#34)** is also complete upstream
+**S4 (#33)** has committed pricing-page research in `S4-repair-price-pages.json`,
+which P3 reads. **S2 (#31)** and **S3 (#32)** are complete; **S5 (#34)** is also complete upstream
 (PR #120 merged September 30, 2026). Treat a closed `1.x` GitHub issue as evidence
 of nothing.
 
@@ -318,8 +319,7 @@ of nothing.
 PRD changes are proposed in PRs #122 and #123. P1/P3 provide the scaffold and S4
 registry without adopting those proposed schema fields.
 
-**Startable right now, nothing blocking:** S1 (#30) dev keys · S4 (#33) pricing-page
-registry · W2 (#68) progress bar · L12–L14
+**Startable right now, nothing blocking:** S1 (#30) dev keys · W2 (#68) progress bar · L12–L14
 (#108–110) licence, contributing guide, README.
 
 **The Web App is on nobody's path** once S9 (#38) and S11 (#40) exist. If it is ever
