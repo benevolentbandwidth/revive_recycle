@@ -342,7 +342,7 @@ The user fills out a **standard + variable** form describing their device's cond
   - Device spec specifics (e.g. storage configuration), driven by the catalog's `variable_fields`.
   - Other device-specific questions relevant to triage.
 
-The field named by the device's `variant_key_field` feeds the market cache key, so the form prompts for it rather than allowing it to be left blank.
+The field named by the device's `variant_key_field` feeds the market cache key, so the form prompts for it rather than allowing it to be left blank. Other fields may offer "Not sure" (the reserved option value `not-sure`, §10.2), which widens the repair-cost range rather than blocking the result (§8.2).
 
 ### 7.4 LLM classification & clarification loop
 
@@ -446,7 +446,19 @@ At runtime the frontend combines the LLM's per-issue probabilities with the cata
   - `weighted_low` = Σ (issue probability × issue `flat_rate.low`)
   - `weighted_high` = Σ (issue probability × issue `flat_rate.high`)
   - The probabilities are **independent per issue, not a distribution that sums to 1** (C1, #88): several issues can be likely at once — water damage typically raises screen, battery, speaker, and charging port together. The weighted cost is therefore the expected total cost of the repairs the device probably needs, and can exceed any single repair.
-  - **Bundled issues contribute once.** Where two or more classified issues share a `bundled_with` group (§10.2) — a manufacturer repairing them with one line item, at one price — the sum treats that group as a single term: its flat rate contributed once, weighted by the probability that *any* member issue is present, not summed once per member. Without this, a device reporting two symptoms that are really one repair (e.g. "won't charge" and "no sound," both Apple's $609 "Other damage" line) prices that repair twice.
+  - **Variant scoping comes first.** Only `repair_costs` entries and `bundles` whose `applies_to_variant` matches the user's answer are used (§10.2). If the user answered "not sure" on that field, the weighted cost is computed once for each value of the field, and the result is the lowest `weighted_low` and the highest `weighted_high` across those runs.
+  - **Bundles are capped.** A bundle (§10.2) is one manufacturer repair that covers several issues at one price. For the members the classifier returned, with probabilities `pᵢ`, this pair replaces the members' individual terms. Issues outside any bundle are summed as above:
+
+    ```
+    P_any       = 1 − Π(1 − pᵢ)
+    bundle_low  = min( Σ pᵢ × lowᵢ ,  P_any × bundle.flat_rate.low  )
+    bundle_high = min( Σ pᵢ × highᵢ,  P_any × bundle.flat_rate.high )
+    ```
+
+    Both ends are capped, so `bundle_low ≤ bundle_high` always holds. Worked examples:
+    - iPhone 14, `charging-port` 0.8 and `speaker` 0.6, both $59–$609, bundle $609: P_any = 0.92, result **$82.60–$560.28** (uncapped: $82.60–$852.60).
+    - Surface Pro 9, `wont-power-on` 0.7 and `charging-port` 0.5, all $600, bundle $600: P_any = 0.85, result **$510.00–$510.00** (uncapped: $720).
+  - **Unpriced issues.** An issue with no matching `repair_costs` entry after variant scoping stays out of the sum. If its probability is at or above `verdict_rule.unpriced_issue_max_probability`, no verdict is given (§8.3). Below it, the result page names the issue ("we couldn't price: …"). It is never left out silently.
 - A **net gain from repair**, likewise a range. Note the inversion — the cheaper repair produces the larger gain:
   - `net_gain_high` = working value − broken value − `weighted_low`
   - `net_gain_low` = working value − broken value − `weighted_high`
@@ -484,6 +496,8 @@ The **net gain from repair** (§8.2) is the secondary check: even a favourable r
 The user always retains the choice — the tool recommends, it does not decide — and every number is accompanied by source evidence and its date.
 
 **Degraded verdict.** If market values are unavailable (no store entry and quota exhausted, per §6B.6), the dashboard still renders the repair-cost side — per-issue probabilities, cost ranges, weighted cost — and states plainly that a fix-vs-recycle verdict cannot be given without market data. **This is distinct from Unpredictable.** Unpredictable means the data is present and the answer genuinely depends on price variance; degraded means the data is missing and no verdict is possible. The tool never infers a verdict from repair cost alone.
+
+**Unpriced likely issue.** The same no-verdict state applies when an issue with no matching `repair_costs` entry has a probability at or above `verdict_rule.unpriced_issue_max_probability` (default `0.5`). Without this, a MacBook Air M2 user who reports only "won't power on" would get a repair cost near $0 and a Revive verdict. The screen uses its own wording, saying the repair couldn't be priced, distinct from the missing-market-data wording.
 
 ---
 
@@ -536,12 +550,15 @@ This file is an **input** to the pipeline and is never written by it. It is edit
 
 Repair-side data, guide references, and device metadata. A lightweight static JSON payload covering the 20 supported devices. It carries **no market values** — those live in Firestore (§10.3).
 
+The official format is [`schemas/device-catalog.schema.json`](schemas/device-catalog.schema.json). This section summarizes it; where the two differ, the schema wins.
+
 ```json
 {
-  "generated_at": "2026-08-04T00:00:00Z",
+  "generated_at": "2026-10-01T00:00:00Z",
   "verdict_rule": {
     "revive_below_ratio": 0.5,
-    "recycle_above_ratio": 0.8
+    "recycle_above_ratio": 0.8,
+    "unpriced_issue_max_probability": 0.5
   },
   "refresh_rule": {
     "sanity_band_pct": 40,
@@ -549,97 +566,208 @@ Repair-side data, guide references, and device metadata. A lightweight static JS
   },
   "devices": [
     {
-      "device_id": "iphone-12",
-      "display_name": "Apple iPhone 12",
+      "device_id": "iphone-14",
+      "display_name": "Apple iPhone 14",
       "variable_fields": [
-        { "key": "storage", "label": "Storage", "options": ["64GB", "128GB", "256GB"] }
+        {
+          "key": "storage",
+          "label": "Storage",
+          "options": [
+            { "value": "128gb", "label": "128GB" },
+            { "value": "256gb", "label": "256GB" },
+            { "value": "512gb", "label": "512GB" }
+          ]
+        }
       ],
       "variant_key_field": "storage",
       "repair_costs": [
         {
           "issue": "screen",
-          "label": "Cracked / faulty screen",
-          "flat_rate": { "low": 150, "high": 280, "currency": "USD" },
-          "bundled_with": [],
-          "caveats": [],
-          "basis": "extracted",
-          "as_of": "2026-08-01",
-          "sources": ["https://support.apple.com/iphone/repair"]
-        },
-        {
-          "issue": "battery",
-          "label": "Battery degradation",
-          "flat_rate": { "low": 55, "high": 89, "currency": "USD" },
-          "bundled_with": [],
-          "caveats": ["single-source"],
+          "label": "Screen is cracked, black, or glitching",
+          "flat_rate": { "low": 79, "high": 349, "currency": "USD" },
           "basis": "seed",
-          "as_of": "2026-06-15",
-          "sources": ["https://support.apple.com/iphone/repair"]
+          "as_of": "2026-09-23",
+          "sources": [
+            "https://support.apple.com/iphone/repair/screen-replacement",
+            "https://onehourdevicerepair.com/iphone-14-series/"
+          ]
         },
         {
           "issue": "charging-port",
-          "label": "Charging port doesn't charge or connect",
-          "flat_rate": { "low": 609, "high": 609, "currency": "USD" },
-          "bundled_with": ["water-damage", "speaker"],
-          "caveats": [],
+          "label": "Won't charge, or only charges sometimes",
+          "flat_rate": { "low": 59, "high": 609, "currency": "USD" },
           "basis": "seed",
-          "as_of": "2026-06-15",
-          "sources": ["https://support.apple.com/iphone/repair"]
+          "as_of": "2026-09-23",
+          "sources": ["https://www.houstoniphonerepair.com/iphone_repair/iphone_14_repair.html"]
+        },
+        {
+          "issue": "speaker",
+          "label": "Can't hear anything, or sound is muffled/crackling",
+          "flat_rate": { "low": 59, "high": 609, "currency": "USD" },
+          "basis": "seed",
+          "as_of": "2026-09-23",
+          "sources": ["https://www.ifixforu.com/en/blog/iphone-speaker-repair-cost"]
+        },
+        {
+          "issue": "water-damage",
+          "label": "Got wet, spilled on, or otherwise liquid-damaged",
+          "flat_rate": { "low": 609, "high": 609, "currency": "USD" },
+          "caveats": ["single-source"],
+          "basis": "seed",
+          "as_of": "2026-09-23",
+          "sources": ["https://support.apple.com/iphone/repair/screen-replacement"]
+        },
+        {
+          "issue": "wont-power-on",
+          "label": "Won't turn on at all",
+          "flat_rate": { "low": 609, "high": 609, "currency": "USD" },
+          "caveats": ["single-source"],
+          "basis": "seed",
+          "as_of": "2026-09-23",
+          "sources": ["https://support.apple.com/iphone/repair/screen-replacement"]
+        }
+      ],
+      "bundles": [
+        {
+          "id": "apple-other-damage",
+          "members": ["water-damage", "wont-power-on", "charging-port", "speaker"],
+          "flat_rate": { "low": 609, "high": 609, "currency": "USD" },
+          "caveats": ["single-source"],
+          "basis": "seed",
+          "as_of": "2026-09-23",
+          "sources": ["https://support.apple.com/iphone/repair/screen-replacement"]
         }
       ],
       "guides": [
         {
           "issue": "screen",
           "guide_id": "ifixit-12345",
-          "title": "iPhone 12 Screen Replacement",
-          "url": "https://www.ifixit.com/Guide/...",
+          "title": "iPhone 14 Screen Replacement",
+          "url": "https://www.ifixit.com/Guide/12345",
           "difficulty": "Moderate",
           "time_estimate": "45 minutes"
         }
       ],
-      "sources": { "guides": "https://ifixit.com/Device/iPhone_12" }
+      "sources": { "guides": "https://www.ifixit.com/Device/iPhone_14" }
     },
     {
       "device_id": "surface-pro-9",
       "display_name": "Microsoft Surface Pro 9",
       "variable_fields": [
-        { "key": "storage", "label": "Storage", "options": ["128GB", "256GB", "512GB", "1TB"] },
-        { "key": "connectivity", "label": "Connectivity", "options": ["wifi", "5g"] }
+        {
+          "key": "storage",
+          "label": "Storage",
+          "options": [
+            { "value": "128gb", "label": "128GB" },
+            { "value": "256gb", "label": "256GB" },
+            { "value": "512gb", "label": "512GB" },
+            { "value": "1tb", "label": "1TB" }
+          ]
+        },
+        {
+          "key": "connectivity",
+          "label": "Does it have 5G?",
+          "options": [
+            { "value": "wifi", "label": "No, Wi-Fi only" },
+            { "value": "5g", "label": "Yes, 5G" },
+            { "value": "not-sure", "label": "Not sure" }
+          ]
+        }
       ],
       "variant_key_field": "storage",
       "repair_costs": [
         {
           "issue": "charging-port",
-          "label": "Charging port doesn't charge or connect",
+          "label": "Won't charge, or only charges sometimes",
           "flat_rate": { "low": 600, "high": 600, "currency": "USD" },
-          "bundled_with": ["speaker"],
           "applies_to_variant": { "field": "connectivity", "values": ["wifi"] },
-          "caveats": [],
+          "caveats": ["single-source"],
           "basis": "seed",
           "as_of": "2026-09-23",
-          "sources": ["https://www.microsoft.com/en-us/surface/devices/surface-repair"]
+          "sources": ["https://support.microsoft.com/en-us/surface/hardware-warranty/how-much-does-out-of-warranty-service-cost-for-your-device-or-accessory-united-states"]
+        },
+        {
+          "issue": "charging-port",
+          "label": "Won't charge, or only charges sometimes",
+          "flat_rate": { "low": 850, "high": 850, "currency": "USD" },
+          "applies_to_variant": { "field": "connectivity", "values": ["5g"] },
+          "caveats": ["single-source"],
+          "basis": "seed",
+          "as_of": "2026-09-23",
+          "sources": ["https://support.microsoft.com/en-us/surface/hardware-warranty/how-much-does-out-of-warranty-service-cost-for-your-device-or-accessory-united-states"]
         }
       ],
       "guides": [],
-      "sources": { "guides": "https://ifixit.com/Device/Surface_Pro_9" }
+      "sources": { "guides": "https://www.ifixit.com/Device/Surface_Pro_9" }
     }
   ]
 }
 ```
 
+The example is trimmed. The full data is in `data/repair_costs.seed.json`.
+
+**Fields**
+
+| Field | Type | Required |
+|---|---|---|
+| `generated_at` | ISO 8601 date-time string | yes |
+| `verdict_rule.revive_below_ratio` | number, 0–1 | yes |
+| `verdict_rule.recycle_above_ratio` | number, 0–1 | yes |
+| `verdict_rule.unpriced_issue_max_probability` | number, 0–1 | yes |
+| `refresh_rule.sanity_band_pct` | number, > 0 | yes |
+| `refresh_rule.cadence` | `"monthly"` | yes |
+| `devices[]` | array of device, at least 1 | yes |
+| device `.device_id` | kebab-case string | yes |
+| device `.display_name` | string | yes |
+| device `.variable_fields[]` | array of `{key, label, options[]}` | yes (may be empty) |
+| `variable_fields[].options[]` | array of `{value, label}`, at least 2; `value` is lowercase | yes |
+| device `.variant_key_field` | a `variable_fields` key, or `null` for a device with no variant axis | yes |
+| device `.repair_costs[]` | array of price entry | yes (may be empty) |
+| device `.bundles[]` | array of bundle | no |
+| device `.guides[]` | array of guide | yes (may be empty) |
+| device `.sources.guides` | URL | yes |
+| price entry `.issue` | S3 issue id | yes |
+| price entry `.label` | string | yes |
+| price entry / bundle `.flat_rate` | `{low, high, currency}`; numbers ≥ 0; 3-letter currency code | yes |
+| price entry / bundle `.basis` | `"seed"` or `"extracted"` | yes |
+| price entry / bundle `.as_of` | `YYYY-MM-DD` | yes |
+| price entry / bundle `.sources[]` | URLs, at least 1 | yes |
+| price entry / bundle `.caveats[]` | `"single-source"`, `"tier-priced"` | no |
+| price entry / bundle `.applies_to_variant` | `{field, values[]}` | no |
+| bundle `.id` | kebab-case string | yes |
+| bundle `.members[]` | S3 issue ids, at least 2 | yes |
+| guide `.issue` | S3 issue id | yes |
+| guide `.guide_id` | string | yes |
+| guide `.title` | string | yes |
+| guide `.url` | URL | yes |
+| guide `.difficulty` | iFixit difficulty: `Very easy`, `Easy`, `Moderate`, `Difficult`, `Very difficult` | no |
+| guide `.time_estimate` | string, as iFixit gives it | no |
+
+**Rules the schema can't express.** S8's check script enforces these alongside the schema:
+
+- `flat_rate.low ≤ flat_rate.high`. `low == high` is allowed only when `caveats` contains `single-source`.
+- `variant_key_field` and every `applies_to_variant.field` name one of the device's `variable_fields`. Every `applies_to_variant.values` item is an option `value` of that field, and is never `not-sure`.
+- `not-sure` is a reserved option value. It is allowed on any field except the one named by `variant_key_field`, because the market lookup needs a real variant.
+- For each variant, an issue has at most one matching price entry.
+- Every bundle member has a matching price entry on the same device for every variant the bundle applies to.
+- For each variant, an issue belongs to at most one bundle.
+- Every `issue` and bundle member applies to the device's type, per S3's mapping. The schema checks only the global S3 list.
+- `device_id` and bundle `id` are unique.
+
 Field notes:
 
-- `flat_rate` is a **range**, never a point. Repair prices differ by provider (§6A.3) and the range is the honest representation. The range stays wide even when the spread comes from part grade rather than shop margin — narrowing it to one grade would misrepresent real cost to a user who isn't expected to know what a part grade is.
-- `bundled_with` lists the other `issue` ids that resolve to the same real-world repair — a manufacturer's catch-all line (e.g. Apple's "Other damage") covers several failure categories with one price. Entries sharing a bundle carry identical `flat_rate`, `basis`, `as_of`, and `sources`, so a classified symptom still maps to a cost on its own. At runtime (§8.2), issues sharing a bundle contribute that flat rate **once**, weighted by the probability that any member issue is present — not once per issue.
-- `caveats` flags an entry that's less certain than the number alone shows: `single-source` (only one price was found, so `low` equals `high`) or `tier-priced` (the source prices a band of devices, not this exact model). Omitted or empty means neither applies. It has no effect on the math in §8 — it's a transparency signal for the dashboard and for reviewers, the same role `basis` plays for `seed` vs. `extracted`.
-- `applies_to_variant` scopes an entry to specific values of one of the device's `variable_fields`, for the rare device where the repair price itself differs by variant, not just market value (e.g. Surface Pro 9's 5G model prices differently from its Wi-Fi model). Omitted means the entry applies to every variant — true for almost every device and every entry.
-- Not every catalog `issue` needs a `repair_costs` entry. An issue with no usable price — no source publishes one, or the fix depends on diagnosis rather than a fixed repair — is simply absent from `repair_costs[]`. The frontend excludes an issue with no matching entry from the weighted-cost sum (§8.2) rather than treating its absence as an error.
-- `basis` is `seed` or `extracted` — where this specific value came from. It drives nothing in the UI directly, but makes a stalled pipeline diagnosable from the payload alone.
-- `as_of` is the date this value was **observed**, not necessarily the date it took effect — no repair-pricing source publishes an effective date. It is displayed to the user (§7.7) as "repair prices as of ‹date›", read in that sense. A `seed` entry with an old `as_of` is a source that has not been successfully refreshed.
+- `flat_rate` is a **range**, never a point. Repair prices differ by provider (§6A.3) and the range is the honest representation. The range stays wide even when the spread comes from part grade rather than shop margin. Narrowing it to one grade would misrepresent real cost to a user who isn't expected to know what a part grade is.
+- `bundles` lists manufacturer repairs that cover several issues at one price, such as Apple's iPhone "Other damage" line. Each member keeps its own `repair_costs` entry and its own range, so the independent-shop price for a single issue isn't lost. At runtime (§8.2), the bundle caps what its members add up to.
+- `caveats` flags a price that's less certain than the number alone shows. `single-source` means only one price was found, so `low` equals `high`. `tier-priced` means the source prices a band of devices (e.g. "MacBook Air 13-inch M1–M3"), not this exact model. Caveats have no effect on the math in §8. They are a transparency signal for the dashboard and for reviewers.
+- `applies_to_variant` scopes a price entry or bundle to some values of one of the device's `variable_fields`. It's for the rare device where the repair price itself differs by variant. Surface Pro 9's 5G model is priced on a different Microsoft scheme from its Wi-Fi model. Omitted means the entry applies to every variant.
+- Option `value`s are lowercase and are what everything matches on: `applies_to_variant.values`, the classifier's `variant`, and the market lookup key. `label` is display text only.
+- Not every issue needs a `repair_costs` entry. An issue with no supportable price is left out, with no null or zero placeholder. §8.2 and §8.3 set what happens when a user reports one.
+- `basis` is `seed` or `extracted`, meaning where this specific value came from. It drives nothing in the UI directly, but makes a stalled pipeline diagnosable from the payload alone.
+- `as_of` is the date this value was **observed**, not necessarily the date it took effect. No repair-pricing source publishes an effective date. It is displayed to the user (§7.7) as "repair prices as of ‹date›", read in that sense. A `seed` entry with an old `as_of` is a source that has not been successfully refreshed.
 - `sources` is a list, because a range can span several providers. Every entry must carry at least one.
 - `guides` is keyed by the same `issue` ids as `repair_costs`, so a classified symptom maps to both a cost and a set of guides.
-- `variant_key_field` names which variable field participates in the market cache key, so the LLM and the service agree on what `variant` means for a given device. It is independent of `applies_to_variant`, which scopes individual repair prices rather than the market lookup.
-- `verdict_rule` holds the ratio boundaries from §8.3 and `refresh_rule.sanity_band_pct` the Layer 3 band width (§6A.4), so both can be retuned by redeploying the catalog rather than the code or the pipeline.
+- `variant_key_field` names which variable field participates in the market cache key, so the LLM and the service agree on what `variant` means for a given device. It is independent of `applies_to_variant`, which scopes repair prices, not the market lookup.
+- `verdict_rule` holds the ratio boundaries and the unpriced-issue threshold from §8.3. `refresh_rule.sanity_band_pct` holds the Layer 3 band width (§6A.4). All of them can be retuned by redeploying the catalog rather than the code or the pipeline.
 
 The payload must remain small enough to deliver quickly over the CDN and must carry source links for every value.
 
@@ -698,7 +826,9 @@ Constraints on this document:
 - **Layer 3, no baseline:** An entry with no prior value accepts its first extraction but marks it for review.
 - Differing naming conventions are mapped to canonical entries; clear outliers are trimmed during range assembly.
 - The previously deployed catalog stays live on any failed run.
-- Issues sharing a `bundled_with` group carry identical `flat_rate`, `basis`, `as_of`, and `sources` — they are one priced repair, not independent prices that happen to match.
+- Every published catalog passes `schemas/device-catalog.schema.json` and the rules listed under it in §10.2.
+- Bundles: every member has a `repair_costs` entry on the same device, a bundle has 2 or more members, and for each variant an issue belongs to at most one bundle.
+- `flat_rate.low == flat_rate.high` only on an entry or bundle whose `caveats` contains `single-source`.
 - An issue with no supportable price is simply absent from `repair_costs[]`. The catalog carries no null or zero placeholder for it.
 
 **Market data service (§6B)**
@@ -742,8 +872,9 @@ Constraints on this document:
 - **Verdict at both ends:** the ratio is evaluated at both `weighted_low` and `weighted_high`. Where the two ends yield different outcomes, the verdict rendered is **Unpredictable**, with an explanation that the answer depends on which shop the user uses.
 - Unpredictable renders with the same visual weight as Revive and Recycle, and all three paths remain available.
 - **Degraded ≠ Unpredictable:** when market data is unavailable, the repair-cost side still renders and the screen states that a verdict cannot be given — distinct in copy and presentation from an Unpredictable verdict, and never inferred from repair cost alone.
-- **Bundled issues count once:** where two or more classified issues share a `bundled_with` group, the weighted cost contributes that group's flat rate once — weighted by the probability that any member issue is present — not once per member issue.
-- An issue with no matching `repair_costs` entry is excluded from the weighted-cost sum, not treated as zero cost or as an error.
+- **Bundles are capped:** the weighted cost for a bundle's classified members follows the §8.2 formula. The two worked examples in §8.2 produce exactly $82.60–$560.28 and $510.00–$510.00.
+- **Variant scoping:** only entries and bundles whose `applies_to_variant` matches the user's answer are used. A "not sure" answer produces the lowest low and highest high across that field's values.
+- **Unpriced likely issue:** an issue with no matching `repair_costs` entry and probability at or above `verdict_rule.unpriced_issue_max_probability` gives no verdict, with wording distinct from the missing-market-data case. Below the threshold, the issue stays out of the sum and the result page names it as unpriced.
 - `caveats` has no effect on the weighted-cost or verdict computation. It is read by the dashboard and by reviewers only.
 - Selecting Revive returns nearby repair shops sorted by distance. Selecting Recycle offers trade-in and e-waste drop-off and returns matching centers sorted by distance. Selecting Sell broken returns as-is comps with prices, sale dates, and links.
 - Every downstream path returns to the dashboard.
