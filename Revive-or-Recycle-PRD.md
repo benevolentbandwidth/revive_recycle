@@ -507,27 +507,47 @@ There are three: the committed seed file that feeds the pipeline, the catalog th
 
 ### 10.1 `data/repair_costs.seed.json` — committed, hand-maintained
 
-The Layer 1 floor (§6A.2). Entry shape matches `repair_costs[]` in the catalog so the pipeline merges it field-for-field.
+The Layer 1 floor (§6A.2). Price entries and bundles match the catalog's `repair_costs[]` and `bundles[]` (§10.2) field for field, so the pipeline copies them without conversion.
 
 ```json
 {
-  "compiled_at": "2026-08-01",
+  "compiled_at": "2026-11-09",
   "devices": {
-    "iphone-12": [
-      {
-        "issue": "screen",
-        "label": "Cracked / faulty screen",
-        "flat_rate": { "low": 150, "high": 280, "currency": "USD" },
-        "as_of": "2026-08-01",
-        "sources": [
-          "https://support.apple.com/iphone/repair",
-          "https://www.ubreakifix.com/..."
-        ]
-      }
-    ]
+    "iphone-14": {
+      "repair_costs": [
+        {
+          "issue": "water-damage",
+          "label": "Got wet, spilled on, or otherwise liquid-damaged",
+          "flat_rate": { "low": 609, "high": 609, "currency": "USD" },
+          "caveats": ["single-source"],
+          "as_of": "2026-09-23",
+          "sources": ["https://support.apple.com/iphone/repair/screen-replacement"]
+        }
+      ],
+      "bundles": [
+        {
+          "id": "apple-other-damage",
+          "members": ["water-damage", "wont-power-on", "charging-port", "speaker"],
+          "flat_rate": { "low": 609, "high": 609, "currency": "USD" },
+          "caveats": ["single-source"],
+          "as_of": "2026-09-23",
+          "sources": ["https://support.apple.com/iphone/repair/screen-replacement"]
+        }
+      ]
+    }
   }
 }
 ```
+
+The example is trimmed. The full data is in `data/repair_costs.seed.json`.
+
+**Who fills in what**
+
+| Field | Filled in by |
+|---|---|
+| `compiled_at`, `issue`, `label`, `flat_rate`, `as_of`, `sources` | A person |
+| `caveats`, `applies_to_variant`, bundle `id` and `members` | A person, only when they apply |
+| `basis` | The pipeline. It sets `seed` on every value it copies from this file |
 
 This file is an **input** to the pipeline and is never written by it. It is edited by humans, by pull request, with a source link required for any price change.
 
