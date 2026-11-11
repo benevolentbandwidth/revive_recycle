@@ -59,9 +59,9 @@ lowest low and the highest high.
   unpriced likely issue. It must read differently from the "no sale-price data" wording.
 - **#37 (S8):** enforce the rules listed under the field table in PRD §10.2. JSON Schema
   can't express them.
-- **Layer 2 extraction exclusions (item 8):** the extraction prompt must reject data
+- **#45 (P5), extraction exclusions (item 8):** the extraction prompt must reject data
   recovery, diagnostic fees, deposits, accessory purchases, and labor-plus-part prices. Read
   S5 cases 8 and 14 first.
-- **Verdict threshold retest (item 4):** S5 case 6 shows honest ranges pushing common
-  repairs to Unpredictable against a placeholder market value. Recheck once Track B returns
-  real `working_median` values.
+- **#97 (I2), verdict threshold retest (item 4):** S5 case 6 shows honest ranges pushing common
+  repairs to Unpredictable against a placeholder market value. Recheck once the Market Data
+  Service returns real `working_median` values.
