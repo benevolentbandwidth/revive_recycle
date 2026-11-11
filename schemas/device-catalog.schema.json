@@ -1,0 +1,237 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://github.com/benevolentbandwidth/revive_recycle/schemas/device-catalog.schema.json",
+  "title": "Device Catalog",
+  "description": "The official format of device_catalog.json (PRD §10.2, S6 #35). Checks shape only. Cross-field rules (low <= high, single-source on equal prices, bundle members exist, applies_to_variant names a real field and option, per-device S3 issue mapping) are listed under the field table in PRD §10.2 and enforced by S8's check script.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["generated_at", "verdict_rule", "refresh_rule", "devices"],
+  "properties": {
+    "generated_at": {
+      "description": "When the pipeline built this file. ISO 8601 date-time, UTC.",
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d+)?Z$"
+    },
+    "verdict_rule": {
+      "description": "Verdict thresholds (PRD §8.3). Retuned by redeploying the catalog.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["revive_below_ratio", "recycle_above_ratio", "unpriced_issue_max_probability"],
+      "properties": {
+        "revive_below_ratio": { "type": "number", "minimum": 0, "maximum": 1 },
+        "recycle_above_ratio": { "type": "number", "minimum": 0, "maximum": 1 },
+        "unpriced_issue_max_probability": {
+          "description": "An unpriced issue at or above this probability blocks the verdict (PRD §8.3).",
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        }
+      }
+    },
+    "refresh_rule": {
+      "description": "Pipeline settings (PRD §6A.4).",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["sanity_band_pct", "cadence"],
+      "properties": {
+        "sanity_band_pct": { "type": "number", "exclusiveMinimum": 0 },
+        "cadence": { "enum": ["monthly"] }
+      }
+    },
+    "devices": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/definitions/device" }
+    }
+  },
+  "definitions": {
+    "kebabId": {
+      "type": "string",
+      "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$"
+    },
+    "issue": {
+      "description": "One of the ten S3 issue ids. Same list as schemas/classifier-response.schema.json.",
+      "enum": [
+        "screen",
+        "battery",
+        "wont-power-on",
+        "water-damage",
+        "charging-port",
+        "speaker",
+        "camera",
+        "keyboard-trackpad",
+        "hinge-kickstand",
+        "overheating"
+      ]
+    },
+    "date": {
+      "type": "string",
+      "format": "date",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+    },
+    "url": {
+      "type": "string",
+      "format": "uri",
+      "pattern": "^https?://"
+    },
+    "flatRate": {
+      "description": "A price range. low == high only with caveats: [\"single-source\"] (checked by S8, not by this schema).",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["low", "high", "currency"],
+      "properties": {
+        "low": { "type": "number", "minimum": 0 },
+        "high": { "type": "number", "minimum": 0 },
+        "currency": { "type": "string", "pattern": "^[A-Z]{3}$" }
+      }
+    },
+    "basis": {
+      "description": "Where the value came from: the hand-written seed file or a pipeline extraction.",
+      "enum": ["seed", "extracted"]
+    },
+    "sources": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/definitions/url" }
+    },
+    "caveats": {
+      "description": "single-source: only one price found. tier-priced: the source prices a band of models, not this one.",
+      "type": "array",
+      "uniqueItems": true,
+      "items": { "enum": ["single-source", "tier-priced"] }
+    },
+    "appliesToVariant": {
+      "description": "Limits a price entry or bundle to some values of one variable field. Omitted means every variant.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["field", "values"],
+      "properties": {
+        "field": { "$ref": "#/definitions/kebabId" },
+        "values": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": { "$ref": "#/definitions/kebabId" }
+        }
+      }
+    },
+    "variableField": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["key", "label", "options"],
+      "properties": {
+        "key": { "$ref": "#/definitions/kebabId" },
+        "label": { "type": "string", "minLength": 1 },
+        "options": {
+          "description": "value is lowercase and is what all matching uses. label is display text. 'not-sure' is a reserved value.",
+          "type": "array",
+          "minItems": 2,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["value", "label"],
+            "properties": {
+              "value": { "$ref": "#/definitions/kebabId" },
+              "label": { "type": "string", "minLength": 1 }
+            }
+          }
+        }
+      }
+    },
+    "repairCost": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["issue", "label", "flat_rate", "basis", "as_of", "sources"],
+      "properties": {
+        "issue": { "$ref": "#/definitions/issue" },
+        "label": { "type": "string", "minLength": 1 },
+        "flat_rate": { "$ref": "#/definitions/flatRate" },
+        "applies_to_variant": { "$ref": "#/definitions/appliesToVariant" },
+        "caveats": { "$ref": "#/definitions/caveats" },
+        "basis": { "$ref": "#/definitions/basis" },
+        "as_of": { "$ref": "#/definitions/date" },
+        "sources": { "$ref": "#/definitions/sources" }
+      }
+    },
+    "bundle": {
+      "description": "One manufacturer repair covering several issues at one price. Caps what its members add up to (PRD §8.2).",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "members", "flat_rate", "basis", "as_of", "sources"],
+      "properties": {
+        "id": { "$ref": "#/definitions/kebabId" },
+        "members": {
+          "type": "array",
+          "minItems": 2,
+          "uniqueItems": true,
+          "items": { "$ref": "#/definitions/issue" }
+        },
+        "flat_rate": { "$ref": "#/definitions/flatRate" },
+        "applies_to_variant": { "$ref": "#/definitions/appliesToVariant" },
+        "caveats": { "$ref": "#/definitions/caveats" },
+        "basis": { "$ref": "#/definitions/basis" },
+        "as_of": { "$ref": "#/definitions/date" },
+        "sources": { "$ref": "#/definitions/sources" }
+      }
+    },
+    "guide": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["issue", "guide_id", "title", "url"],
+      "properties": {
+        "issue": { "$ref": "#/definitions/issue" },
+        "guide_id": { "type": "string", "minLength": 1 },
+        "title": { "type": "string", "minLength": 1 },
+        "url": { "$ref": "#/definitions/url" },
+        "difficulty": { "enum": ["Very easy", "Easy", "Moderate", "Difficult", "Very difficult"] },
+        "time_estimate": { "type": "string", "minLength": 1 }
+      }
+    },
+    "device": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "device_id",
+        "display_name",
+        "variable_fields",
+        "variant_key_field",
+        "repair_costs",
+        "guides",
+        "sources"
+      ],
+      "properties": {
+        "device_id": { "$ref": "#/definitions/kebabId" },
+        "display_name": { "type": "string", "minLength": 1 },
+        "variable_fields": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/variableField" }
+        },
+        "variant_key_field": {
+          "description": "The variable field that feeds the market lookup key, or null for a device with no variant axis (variant 'base').",
+          "oneOf": [{ "$ref": "#/definitions/kebabId" }, { "type": "null" }]
+        },
+        "repair_costs": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/repairCost" }
+        },
+        "bundles": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/bundle" }
+        },
+        "guides": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/guide" }
+        },
+        "sources": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["guides"],
+          "properties": {
+            "guides": { "$ref": "#/definitions/url" }
+          }
+        }
+      }
+    }
+  }
+}
