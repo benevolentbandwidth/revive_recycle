@@ -549,6 +549,8 @@ The example is trimmed. The full data is in `data/repair_costs.seed.json`.
 | `caveats`, `applies_to_variant`, bundle `id` and `members` | A person, only when they apply |
 | `basis` | The pipeline. It sets `seed` on every value it copies from this file |
 
+`applies_to_variant` must match the catalog exactly (§10.2). `field` is the device's `variable_fields` key, and each of `values` is one of that field's option values, e.g. `connectivity` with `wifi` or `5g`. A typo such as `5G` or `wi-fi` silently drops the entry for that variant.
+
 This file is an **input** to the pipeline and is never written by it. It is edited by humans, by pull request, with a source link required for any price change.
 
 ### 10.2 `device_catalog.json` — static, CDN, monthly
