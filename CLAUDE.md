@@ -63,7 +63,9 @@ and builds, but renders a placeholder page: the real screens read
 [web/README.md](web/README.md).
 
 `device_catalog.json` **does not exist yet**. Neither does `data/repair_costs.seed.json`,
-the market data service, the pipeline, or the Firestore store.
+the market data service, or the Firestore store in this checkout. `pipeline/` contains
+the Python 3.11 scaffold and S4 pricing-page registry (P1/P3). They do not depend on
+the Device Catalog schema or implement seed loading or catalog writing.
 
 ## Target architecture (PRD §5)
 
@@ -305,19 +307,19 @@ them do not, which is what lets them run in parallel.
 > milestones. If you see "M1" now, it is the Cloud Function GitHub issue.
 
 **Anything numbered `0.x` or `1.x` is dead.** GitHub issues #21–#29 were closed **as
-not planned** on 2026-08-13 — superseded by the renumbering, *not* completed. Only two
-GitHub issues are genuinely done: **S2 (#31)** and **S3 (#32)**. Treat a closed `1.x`
-GitHub issue as evidence of nothing.
+not planned** on 2026-08-13 — superseded by the renumbering, *not* completed.
+**S4 (#33)** has committed pricing-page research in `S4-repair-price-pages.json`,
+which P3 reads. **S2 (#31)** and **S3 (#32)** are complete; **S5 (#34)** is also complete upstream
+(PR #120 merged September 30, 2026). Treat a closed `1.x` GitHub issue as evidence
+of nothing.
 
 ### Critical path
 
-**S5 (#34) → S6 (#35).** Those are the only two open GitHub issues carrying the
-`critical path` label, and essentially everything else waits on S6. The old path's
-first two links — infra provisioning and the device/taxonomy decisions — are done or
-gone.
+**S6 (#35) remains open.** S5 (#34) is complete upstream; the S6 schema and companion
+PRD changes are proposed in PRs #122 and #123. P1/P3 provide the scaffold and S4
+registry without adopting those proposed schema fields.
 
-**Startable right now, nothing blocking:** S1 (#30) dev keys · S4 (#33) pricing-page
-registry · S5 (#34) the three devices' prices · W2 (#68) progress bar · L12–L14
+**Startable right now, nothing blocking:** S1 (#30) dev keys · W2 (#68) progress bar · L12–L14
 (#108–110) licence, contributing guide, README.
 
 **The Web App is on nobody's path** once S9 (#38) and S11 (#40) exist. If it is ever
@@ -399,10 +401,17 @@ cd web && npm run build && cd .. && firebase deploy --only hosting
 
 # PR-description check (CI invokes this; needs a GitHub event payload)
 python .github/scripts/validate-pr-body.py
+
+# Catalog Pipeline — Python 3.11, from pipeline/
+python -m pip install uv==0.8.22
+uv sync --locked
+uv run --locked ruff check .
+uv run --locked ruff format --check .
+uv run --locked pytest
 ```
 
-The **Catalog Pipeline** (P1 #41 scaffolds it) and the **Market Data Service** (M1 #54)
-are still unscaffolded; their commands land here when they exist.
+See [pipeline/README.md](pipeline/README.md) for scaffold setup and S4 registry usage.
+The **Market Data Service** (M1 #54) is still unscaffolded.
 
 The old per-service test and scraper commands moved with their code into `legacy/` and
 are **not** maintained — see [legacy/README.md](legacy/README.md). Do not run them to
@@ -424,5 +433,5 @@ acceptance criteria in the GitHub issue itself.
 ## Environment
 
 Windows 10, PowerShell primary (Bash also available). Node 24 / npm 10 for `web/`.
-The Catalog Pipeline and Market Data Service are not scaffolded yet. The only Python in the repo is the
-archived prototype under `legacy/` and the CI PR-description validator. Branch: `main`.
+The Catalog Pipeline uses Python 3.11 and uv with a committed lockfile. The Market Data
+Service is not scaffolded yet. The archived prototype under `legacy/` remains reference only.
